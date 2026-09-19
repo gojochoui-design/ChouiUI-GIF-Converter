@@ -1,0 +1,1147 @@
+{
+  "namespace": "chouiui",
+  "chest_small_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            167
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg_top@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/generic_54",
+                "$bg_size": [
+                  176,
+                  71
+                ],
+                "$sheet_offset": [
+                  0,
+                  0
+                ]
+              }
+            },
+            {
+              "java_bg_bottom@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/generic_54",
+                "$bg_size": [
+                  176,
+                  96
+                ],
+                "$bg_offset": [
+                  0,
+                  71
+                ],
+                "$sheet_offset": [
+                  0,
+                  -126
+                ]
+              }
+            },
+            {
+              "chest_grid": {
+                "type": "grid",
+                "size": [
+                  162,
+                  54
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  17
+                ],
+                "grid_dimensions": [
+                  9,
+                  3
+                ],
+                "collection_name": "container_items",
+                "grid_item_template": "chouiui.container_grid_item"
+              }
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {
+                "$inv_offset": [
+                  7,
+                  83
+                ]
+              }
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {
+                "$hotbar_offset": [
+                  7,
+                  141
+                ]
+              }
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "chest_large_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            222
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/generic_54",
+                "$bg_size": [
+                  176,
+                  222
+                ]
+              }
+            },
+            {
+              "chest_grid": {
+                "type": "grid",
+                "size": [
+                  162,
+                  108
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  17
+                ],
+                "grid_dimensions": [
+                  9,
+                  6
+                ],
+                "collection_name": "container_items",
+                "grid_item_template": "chouiui.container_grid_item"
+              }
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {
+                "$inv_offset": [
+                  7,
+                  139
+                ]
+              }
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {
+                "$hotbar_offset": [
+                  7,
+                  197
+                ]
+              }
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "furnace_flame": {
+    "type": "image",
+    "texture": "textures/ui/furnace_flame",
+    "size": [
+      14,
+      14
+    ],
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      56,
+      36
+    ],
+    "layer": 3,
+    "clip_direction": "down",
+    "bindings": [
+      {
+        "binding_name": "#furnace_flame_ratio",
+        "binding_name_override": "#clip_ratio",
+        "binding_condition": "always"
+      }
+    ]
+  },
+  "furnace_arrow": {
+    "type": "image",
+    "texture": "textures/ui/furnace_arrow",
+    "size": [
+      24,
+      16
+    ],
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      79,
+      34
+    ],
+    "layer": 3,
+    "clip_direction": "left",
+    "bindings": [
+      {
+        "binding_name": "#furnace_arrow_ratio",
+        "binding_name_override": "#clip_ratio",
+        "binding_condition": "always"
+      }
+    ]
+  },
+  "furnace_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            166
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/furnace",
+                "$bg_size": [
+                  176,
+                  166
+                ]
+              }
+            },
+            {
+              "ingredient_slot@chouiui.furnace_ingredient_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  55,
+                  16
+                ]
+              }
+            },
+            {
+              "fuel_slot@chouiui.furnace_fuel_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  55,
+                  52
+                ]
+              }
+            },
+            {
+              "output_slot@chouiui.furnace_output_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  111,
+                  30
+                ]
+              }
+            },
+            {
+              "flame@chouiui.furnace_flame": {}
+            },
+            {
+              "arrow@chouiui.furnace_arrow": {}
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {}
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {}
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "brewing_bubbles": {
+    "type": "image",
+    "texture": "textures/ui/brewing_bubbles",
+    "size": [
+      12,
+      29
+    ],
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      99,
+      18
+    ],
+    "layer": 2,
+    "clip_direction": "down",
+    "bindings": [
+      {
+        "binding_name": "#brewing_bubbles_ratio",
+        "binding_name_override": "#clip_ratio",
+        "binding_condition": "always"
+      }
+    ]
+  },
+  "brewing_line": {
+    "type": "image",
+    "texture": "textures/ui/brewing_line",
+    "size": [
+      9,
+      29
+    ],
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      70,
+      39
+    ],
+    "layer": 2,
+    "clip_direction": "down",
+    "bindings": [
+      {
+        "binding_name": "#brewing_arrow_ratio",
+        "binding_name_override": "#clip_ratio",
+        "binding_condition": "always"
+      }
+    ]
+  },
+  "brewing_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            166
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/brewing_stand",
+                "$bg_size": [
+                  176,
+                  166
+                ]
+              }
+            },
+            {
+              "ingredient_slot@chouiui.brewing_input_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  78,
+                  16
+                ]
+              }
+            },
+            {
+              "fuel_slot@chouiui.brewing_fuel_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  55,
+                  16
+                ]
+              }
+            },
+            {
+              "bottle_slots": {
+                "type": "grid",
+                "size": [
+                  54,
+                  18
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  55,
+                  45
+                ],
+                "grid_dimensions": [
+                  3,
+                  1
+                ],
+                "collection_name": "brewing_result_items",
+                "controls": [
+                  {
+                    "bottle_left": {
+                      "type": "panel",
+                      "grid_position": [
+                        0,
+                        0
+                      ],
+                      "controls": [
+                        {
+                          "item@chouiui.brewing_bottle_item": {}
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bottle_bottom": {
+                      "type": "panel",
+                      "grid_position": [
+                        1,
+                        0
+                      ],
+                      "controls": [
+                        {
+                          "item@chouiui.brewing_bottle_item": {
+                            "offset": [
+                              5,
+                              7
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "bottle_right": {
+                      "type": "panel",
+                      "grid_position": [
+                        2,
+                        0
+                      ],
+                      "controls": [
+                        {
+                          "item@chouiui.brewing_bottle_item": {
+                            "offset": [
+                              10,
+                              0
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "bubbles@chouiui.brewing_bubbles": {}
+            },
+            {
+              "line@chouiui.brewing_line": {}
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {}
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {}
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "anvil_name_box@common.text_edit_box": {
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      60,
+      21
+    ],
+    "size": [
+      104,
+      14
+    ],
+    "property_bag": {
+      "#property_field": "#item_name"
+    },
+    "max_length": 30,
+    "$text_edit_binding_name": "#text_box_item_name",
+    "$text_edit_box_label_size": [
+      "default",
+      10
+    ]
+  },
+  "anvil_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            166
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/anvil",
+                "$bg_size": [
+                  176,
+                  166
+                ]
+              }
+            },
+            {
+              "input_slot@chouiui.anvil_input_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  26,
+                  46
+                ]
+              }
+            },
+            {
+              "material_slot@chouiui.anvil_material_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  75,
+                  46
+                ]
+              }
+            },
+            {
+              "result_slot@chouiui.anvil_result_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  133,
+                  46
+                ]
+              }
+            },
+            {
+              "name_box@chouiui.anvil_name_box": {}
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {}
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {}
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "enchant_runes": {
+    "type": "label",
+    "color": "$enchanting_runes_color",
+    "shadow": false,
+    "layer": 1,
+    "anchor_to": "left_middle",
+    "anchor_from": "left_middle",
+    "text": "#runes",
+    "offset": [
+      20,
+      0
+    ],
+    "size": [
+      82,
+      16
+    ],
+    "font_type": "rune",
+    "bindings": [
+      {
+        "binding_collection_name": "#enchant_buttons",
+        "binding_name": "#runes",
+        "binding_type": "collection"
+      }
+    ]
+  },
+  "enchant_cost": {
+    "type": "label",
+    "color": "$enchanting_cost_success_color",
+    "shadow": true,
+    "offset": [
+      -2,
+      -2
+    ],
+    "layer": 1,
+    "anchor_from": "bottom_right",
+    "anchor_to": "bottom_right",
+    "text": "#cost",
+    "bindings": [
+      {
+        "binding_name": "#cost",
+        "binding_collection_name": "#enchant_buttons",
+        "binding_type": "collection"
+      }
+    ]
+  },
+  "enchant_fail_runes@chouiui.enchant_runes": {
+    "color": "$enchanting_runes_fail_color"
+  },
+  "enchant_fail_cost@chouiui.enchant_cost": {
+    "color": "$enchanting_cost_fail_color"
+  },
+  "enchant_button_base@common.button": {
+    "size": [
+      106,
+      18
+    ],
+    "bindings": [
+      {
+        "binding_name": "$visibility_binding_name",
+        "binding_name_override": "#visible",
+        "binding_collection_name": "#enchant_buttons",
+        "binding_type": "collection"
+      },
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "#enchant_buttons"
+      }
+    ]
+  },
+  "enchant_bar": {
+    "type": "image",
+    "texture": "textures/ui/chouiui_transparent",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "layer": 1
+  },
+  "enchant_hover_bar": {
+    "type": "image",
+    "texture": "textures/ui/chouiui_enchant_hover",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "layer": 1
+  },
+  "enchant_unselectable_button@chouiui.enchant_button_base": {
+    "$visibility_binding_name": "#unselectable_button_visibility",
+    "sound_volume": 0.0,
+    "layer": 22,
+    "button_mappings": [],
+    "controls": [
+      {
+        "default@chouiui.enchant_bar": {}
+      },
+      {
+        "hover@chouiui.enchant_bar": {}
+      },
+      {
+        "pressed@chouiui.enchant_bar": {}
+      },
+      {
+        "rune_text@chouiui.enchant_fail_runes": {}
+      },
+      {
+        "enchant_cost@chouiui.enchant_fail_cost": {}
+      }
+    ]
+  },
+  "enchant_selectable_button@chouiui.enchant_button_base": {
+    "$visibility_binding_name": "#selectable_button_visibility",
+    "sound_volume": 0.0,
+    "layer": 22,
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "button.menu_ok",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "button.menu_ok",
+        "mapping_type": "focused"
+      },
+      {
+        "from_button_id": "button.controller_back",
+        "to_button_id": "button.menu_ok",
+        "mapping_type": "focused",
+        "ignored": "(not $is_ps4)"
+      }
+    ],
+    "controls": [
+      {
+        "default@chouiui.enchant_bar": {}
+      },
+      {
+        "hover@chouiui.enchant_hover_bar": {}
+      },
+      {
+        "pressed@chouiui.enchant_bar": {}
+      },
+      {
+        "rune_text@chouiui.enchant_runes": {}
+      },
+      {
+        "enchant_cost@chouiui.enchant_cost": {}
+      }
+    ]
+  },
+  "enchant_button_row": {
+    "type": "panel",
+    "size": [
+      106,
+      18
+    ],
+    "controls": [
+      {
+        "unselectable@chouiui.enchant_unselectable_button": {}
+      },
+      {
+        "selectable@chouiui.enchant_selectable_button": {}
+      }
+    ]
+  },
+  "enchanting_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            166
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/enchanting_table",
+                "$bg_size": [
+                  176,
+                  166
+                ]
+              }
+            },
+            {
+              "item_slot@chouiui.enchant_input_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  14,
+                  46
+                ]
+              }
+            },
+            {
+              "lapis_slot@chouiui.enchant_lapis_item": {
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  34,
+                  46
+                ]
+              }
+            },
+            {
+              "enchant_buttons_grid": {
+                "type": "grid",
+                "size": [
+                  106,
+                  57
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  60,
+                  13
+                ],
+                "grid_dimensions": [
+                  1,
+                  3
+                ],
+                "collection_name": "#enchant_buttons",
+                "controls": [
+                  {
+                    "row0": {
+                      "type": "panel",
+                      "size": [
+                        106,
+                        19
+                      ],
+                      "grid_position": [
+                        0,
+                        0
+                      ],
+                      "controls": [
+                        {
+                          "btn@chouiui.enchant_button_row": {
+                            "offset": [
+                              0,
+                              1
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "row1": {
+                      "type": "panel",
+                      "size": [
+                        106,
+                        19
+                      ],
+                      "grid_position": [
+                        0,
+                        1
+                      ],
+                      "controls": [
+                        {
+                          "btn@chouiui.enchant_button_row": {
+                            "offset": [
+                              0,
+                              1
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "row2": {
+                      "type": "panel",
+                      "size": [
+                        106,
+                        19
+                      ],
+                      "grid_position": [
+                        0,
+                        2
+                      ],
+                      "controls": [
+                        {
+                          "btn@chouiui.enchant_button_row": {
+                            "offset": [
+                              0,
+                              1
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "dust@enchanting.dust_panel": {
+                "size": [
+                  13,
+                  57
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  65,
+                  14
+                ]
+              }
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {}
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {}
+            },
+            {
+              "x@chouiui.close_button": {
+                "$close_offset": [
+                  -5,
+                  1
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "hopper_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            133
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/hopper",
+                "$bg_size": [
+                  176,
+                  133
+                ]
+              }
+            },
+            {
+              "hopper_grid": {
+                "type": "grid",
+                "size": [
+                  90,
+                  18
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  43,
+                  19
+                ],
+                "grid_dimensions": [
+                  5,
+                  1
+                ],
+                "collection_name": "container_items",
+                "grid_item_template": "chouiui.container_grid_item"
+              }
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {
+                "$inv_offset": [
+                  7,
+                  50
+                ]
+              }
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {
+                "$hotbar_offset": [
+                  7,
+                  108
+                ]
+              }
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  },
+  "dispenser_content": {
+    "type": "panel",
+    "controls": [
+      {
+        "container_gamepad_helpers@common.container_gamepad_helpers": {}
+      },
+      {
+        "selected_item_details_factory@common.selected_item_details_factory": {}
+      },
+      {
+        "item_lock_notification_factory@common.item_lock_notification_factory": {}
+      },
+      {
+        "root_panel@common.root_panel": {
+          "size": [
+            176,
+            166
+          ],
+          "layer": 1,
+          "controls": [
+            {
+              "java_bg@chouiui.java_bg": {
+                "$bg_texture": "textures/ui/dispenser",
+                "$bg_size": [
+                  176,
+                  166
+                ]
+              }
+            },
+            {
+              "dispenser_grid": {
+                "type": "grid",
+                "size": [
+                  54,
+                  54
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  61,
+                  16
+                ],
+                "grid_dimensions": [
+                  3,
+                  3
+                ],
+                "collection_name": "container_items",
+                "grid_item_template": "chouiui.container_grid_item"
+              }
+            },
+            {
+              "inv_grid@chouiui.inv_grid": {}
+            },
+            {
+              "hotbar_grid@chouiui.hotbar_grid": {}
+            },
+            {
+              "x@chouiui.close_button": {}
+            }
+          ]
+        }
+      },
+      {
+        "inventory_selected_icon_button@common.inventory_selected_icon_button": {}
+      },
+      {
+        "gamepad_cursor@common.gamepad_cursor_button": {}
+      },
+      {
+        "flying_item_renderer@common.flying_item_renderer": {
+          "layer": 15
+        }
+      }
+    ]
+  }
+}

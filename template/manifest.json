@@ -1,0 +1,29 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "ChouiUI §7- §fJava 1.8.9 UI",
+    "description": "§bChouiUI v2.3§r - Java Edition 1.8.9 interface port for Bedrock.\n§7drop-in java sheets: any pack, any resolution",
+    "uuid": "09a91262-f098-4a84-809f-3e5b5d93776c",
+    "version": [
+      2,
+      3,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      20,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "2ea83266-b5ad-4d43-bf46-afe45a09fad6",
+      "version": [
+        2,
+        3,
+        0
+      ]
+    }
+  ]
+}
