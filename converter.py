@@ -128,3 +128,16 @@ def preview_first_frame(gif_path):
     bg = Image.new("RGBA", (FRAME_W, FRAME_H), (24, 24, 24, 255))
     bg.alpha_composite(composed)
     return bg.convert("RGB")
+
+def preview_animation(gif_path):
+    """Return the same uniformly selected frames used by the pack preview.
+
+    Delays are scaled after resampling so the preview preserves the original
+    GIF loop duration instead of playing too quickly or too slowly.
+    """
+    frames, delays = read_frames(gif_path)
+    indices = resample_indices(len(frames))
+    selected = [compose_frame(frames[i], load_lines_overlay()).convert("RGB") for i in indices]
+    total = sum(d if d > 0 else DEFAULT_DELAY for d in delays)
+    frame_ms = max(20, int(round(total / max(len(selected), 1))))
+    return selected, [frame_ms] * len(selected)
