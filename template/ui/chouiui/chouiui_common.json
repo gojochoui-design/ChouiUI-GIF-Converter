@@ -81,7 +81,7 @@
       {
         "slot_square": {
           "type": "image",
-          "texture": "textures/ui/brewing_fuel_slot",
+          "texture": "textures/ui/inventory_slot",
           "size": [
             "100%",
             "100%"
