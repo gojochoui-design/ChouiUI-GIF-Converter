@@ -236,14 +236,15 @@ class App(FramelessWindow):
             info = converter.probe(path)
             self.info.setText(f"{os.path.basename(path)}  •  {info.original_count} frames  •  {info.width}x{info.height}")
             self.convert_btn.setEnabled(True)
+            self.frames, self.delays = converter.preview_animation(path)
+            self.frame_index = 0
             if self.movie:
                 self.movie.stop()
                 self.movie.deleteLater()
-            self.movie = QMovie(path)
-            self.movie.setCacheMode(QMovie.CacheAll)
-            self.movie.setScaledSize(QSize(352, 332))
-            self.preview.setMovie(self.movie)
-            self.movie.start()
+            self.preview.setMovie(None)
+            self.preview_overlay.hide()
+            self.show_frame()
+            self.preview_timer.start(self.delays[0] if self.delays else 100)
             self.status.setText("Ready")
         except Exception:
             self.status.setText("Could not read this GIF")
