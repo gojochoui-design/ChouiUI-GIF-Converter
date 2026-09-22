@@ -130,14 +130,12 @@ def preview_first_frame(gif_path):
     return bg.convert("RGB")
 
 def preview_animation(gif_path):
-    """Return the same uniformly selected frames used by the pack preview.
+    """Return every original GIF frame with its native delay.
 
-    Delays are scaled after resampling so the preview preserves the original
-    GIF loop duration instead of playing too quickly or too slowly.
+    The generated Bedrock texture is safely resampled to 11 frames, but the
+    desktop preview must remain smooth. Using every source frame here avoids
+    the visibly slow 11-frame preview for long GIFs.
     """
     frames, delays = read_frames(gif_path)
-    indices = resample_indices(len(frames))
-    selected = [compose_frame(frames[i], load_lines_overlay()).convert("RGB") for i in indices]
-    total = sum(d if d > 0 else DEFAULT_DELAY for d in delays)
-    frame_ms = max(20, int(round(total / max(len(selected), 1))))
-    return selected, [frame_ms] * len(selected)
+    selected = [compose_frame(frame, load_lines_overlay()).convert("RGB") for frame in frames]
+    return selected, [max(20, int(d if d > 0 else DEFAULT_DELAY)) for d in delays]

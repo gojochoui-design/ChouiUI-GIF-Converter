@@ -44,3 +44,7 @@ The Android package is published as `ChouiGIFConverter.apk` with version name `1
 ## Usage
 
 Select a GIF and press the main button. The preview animates at the same overall speed as the generated pack. Press the gear icon in the top-right corner to choose an output folder. If no custom folder is selected, Windows saves the `.mcpack` next to the GIF and Android opens the system save dialog.
+
+## Preview and drag & drop
+
+The Windows preview uses Qt's native `QMovie` decoder, so it displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**.

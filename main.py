@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 
 from PIL.ImageQt import ImageQt
-from PySide6.QtCore import QObject, QPoint, QThread, QTimer, Qt, Signal
+from PySide6.QtCore import QObject, QPoint, QThread, QTimer, Qt, Signal, QSize
 from PySide6.QtGui import QColor, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QMovie
 from PySide6.QtWidgets import (
     QApplication, QDialog, QFileDialog, QFrame, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QProgressBar, QVBoxLayout, QWidget
@@ -132,12 +133,14 @@ class App(FramelessWindow):
         self.frames = []
         self.delays = []
         self.frame_index = 0
+        self.movie = None
         self.preview_timer = QTimer(self)
         self.preview_timer.timeout.connect(self.next_frame)
         self.thread = None
         self.worker = None
         self.setWindowTitle("ChouiUI GIF Converter")
         self.setFixedSize(560, 690)
+        self.setAcceptDrops(True)
         self.setStyleSheet(f"QWidget {{ background:{BG}; color:{TEXT}; }} QPushButton {{ background:{BTN}; color:{TEXT}; border:0; border-radius:7px; padding:10px 18px; font-weight:700; }} QPushButton:hover {{ background:{HOVER}; }} QPushButton:disabled {{ color:#5a5a5a; }} QProgressBar {{ background:{PANEL}; border:0; border-radius:4px; height:7px; }} QProgressBar::chunk {{ background:{ACCENT}; border-radius:4px; }}")
         self.build_ui()
 
@@ -190,6 +193,10 @@ class App(FramelessWindow):
         self.preview.setFixedSize(352, 332)
         self.preview.setAlignment(Qt.AlignCenter)
         self.preview.setStyleSheet(f"background:{PANEL};")
+        self.preview_overlay = QLabel(self.preview)
+        self.preview_overlay.setGeometry(0, 0, 352, 332)
+        self.preview_overlay.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.preview_overlay.setPixmap(pixmap_from_pil(converter.load_lines_overlay().convert("RGB")))
         root.addWidget(self.preview, 0, Qt.AlignHCenter)
         self.convert_btn = QPushButton("CONVERT GIF")
         self.convert_btn.setFixedHeight(46)
@@ -219,17 +226,24 @@ class App(FramelessWindow):
         path, _ = QFileDialog.getOpenFileName(self, "Select GIF", "", "GIF files (*.gif);;All files (*)")
         if not path:
             return
+        self.load_gif_path(path)
+
+    def load_gif_path(self, path):
         self.gif_path = path
         self.info.setText(os.path.basename(path))
         self.status.setText("Reading GIF...")
         try:
-            self.frames, self.delays = converter.preview_animation(path)
             info = converter.probe(path)
             self.info.setText(f"{os.path.basename(path)}  •  {info.original_count} frames  •  {info.width}x{info.height}")
             self.convert_btn.setEnabled(True)
-            self.frame_index = 0
-            self.show_frame()
-            self.preview_timer.start(self.delays[0] if self.delays else 100)
+            if self.movie:
+                self.movie.stop()
+                self.movie.deleteLater()
+            self.movie = QMovie(path)
+            self.movie.setCacheMode(QMovie.CacheAll)
+            self.movie.setScaledSize(QSize(352, 332))
+            self.preview.setMovie(self.movie)
+            self.movie.start()
             self.status.setText("Ready")
         except Exception:
             self.status.setText("Could not read this GIF")
@@ -245,6 +259,21 @@ class App(FramelessWindow):
         self.frame_index = (self.frame_index + 1) % len(self.frames)
         self.show_frame()
         self.preview_timer.start(self.delays[self.frame_index] if self.delays else 100)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls() and any(url.toLocalFile().lower().endswith(".gif") for url in event.mimeData().urls()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if path.lower().endswith(".gif"):
+                self.load_gif_path(path)
+                event.acceptProposedAction()
+                return
+        event.ignore()
 
     def convert_gif(self):
         if not self.gif_path or self.busy:
