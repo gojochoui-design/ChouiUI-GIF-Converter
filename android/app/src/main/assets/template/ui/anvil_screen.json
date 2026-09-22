@@ -1,0 +1,18 @@
+{
+  "anvil_screen": {
+    "variables": [
+      {
+        "requires": "$desktop_screen",
+        "$screen_content": "chouiui.anvil_content",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.4
+      },
+      {
+        "requires": "$pocket_screen",
+        "$screen_content": "chouiui.anvil_content",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.4
+      }
+    ]
+  }
+}
