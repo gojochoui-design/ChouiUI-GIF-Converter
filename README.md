@@ -47,3 +47,7 @@ The Android package is published in Releases as `ChouiGIFConverter.apk`.
 Select a GIF and press the main button. The preview animates using the same frame count and overall timing as the generated pack. Press the **gear icon** in the top-right corner to choose an output folder. If no custom folder is selected, Windows saves the `.mcpack` next to the GIF and Android opens the system save dialog.
 
 The generated pack contains a horizontal frame strip, the Bedrock JSON `flip_book` animation, the inventory line overlay and a `pack_icon.png` generated from the first GIF frame.
+
+## Windows runtime note
+
+The Windows release bundles the Qt Windows platform plugin and an explicit `qt.conf`, so the PySide6 interface starts correctly on clean Windows installations without requiring a separate Qt installation.
