@@ -49,12 +49,17 @@ public class MainActivity extends Activity {
     ProgressBar progress;
     final Handler handler = new Handler(Looper.getMainLooper());
     Movie previewMovie;
-    Bitmap firstPreview;
+    Bitmap firstPreview, inventoryBase, inventoryLines;
     int previewTime=0, previewDuration=100, previewStep=100;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        try {
+            inventoryBase = BitmapFactory.decodeStream(getAssets().open("template/textures/ui/inventory.png"));
+            inventoryLines = BitmapFactory.decodeStream(getAssets().open("template/textures/ui/inventory_lines.png"));
+        } catch (Exception ignored) {}
 
         preview = findViewById(R.id.preview);
         info = findViewById(R.id.info);
@@ -152,8 +157,10 @@ public class MainActivity extends Activity {
             Bitmap frame = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(frame); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             c.drawColor(Color.rgb(27,27,27));
+            if (inventoryBase != null) c.drawBitmap(inventoryBase, null, new Rect(0,0,w,h), p);
             c.drawBitmap(firstPreview, null, new Rect(0,0,w,h), p);
             previewMovie.setTime(previewTime); previewMovie.draw(c, 0, 0, p);
+            if (inventoryLines != null) c.drawBitmap(inventoryLines, null, new Rect(0,0,w,h), p);
             preview.setImageBitmap(frame);
             previewTime = (previewTime + previewStep) % previewDuration;
             handler.postDelayed(this, previewStep);
