@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#111111" android:fillViewport="true">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="22dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="ChouiUI" android:textColor="#e2e2e2" android:textSize="28sp" android:textStyle="bold" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="GIF Converter" android:textColor="#989898" android:textSize="14sp" />
+    <FrameLayout android:id="@+id/previewCard" android:layout_width="330dp" android:layout_height="312dp" android:layout_marginTop="24dp" android:background="#1b1b1b">
+      <ImageView android:id="@+id/preview" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#1b1b1b" android:scaleType="fitXY" android:contentDescription="GIF preview" />
+      <TextView android:id="@+id/placeholderText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="No GIF selected" android:textColor="#5a5a5a" android:textSize="14sp" />
+    </FrameLayout>
+    <TextView android:id="@+id/info" android:layout_width="330dp" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:gravity="center" android:text="Pick a GIF to convert it into an animated inventory" android:textColor="#989898" android:textSize="13sp" />
+    <ProgressBar android:id="@+id/progress" style="?android:attr/progressBarStyleHorizontal" android:layout_width="330dp" android:layout_height="8dp" android:layout_marginTop="8dp" android:max="100" android:visibility="gone" />
+    <Button android:id="@+id/selectButton" android:layout_width="330dp" android:layout_height="54dp" android:layout_marginTop="20dp" android:text="Select GIF" android:textColor="#ffffff" android:textAllCaps="false" android:backgroundTint="#383838" />
+    <Button android:id="@+id/convertButton" android:layout_width="330dp" android:layout_height="54dp" android:layout_marginTop="10dp" android:enabled="false" android:text="Convert to .mcpack" android:textColor="#ffffff" android:textAllCaps="false" android:backgroundTint="#555555" />
+    <LinearLayout android:layout_width="330dp" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:orientation="horizontal" android:gravity="center_vertical">
+      <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Output folder" android:textColor="#989898" android:textSize="12sp" />
+      <Button android:id="@+id/folderButton" android:layout_width="wrap_content" android:layout_height="42dp" android:text="Change" android:textColor="#e2e2e2" android:textAllCaps="false" android:backgroundTint="#2a2a2a" />
+    </LinearLayout>
+    <TextView android:id="@+id/folderValue" android:layout_width="330dp" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="Same folder as the GIF" android:textColor="#5a5a5a" android:textSize="11sp" android:singleLine="true" android:ellipsize="middle" />
+    <TextView android:id="@+id/status" android:layout_width="330dp" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:gravity="center" android:text="Ready" android:textColor="#989898" android:textSize="11sp" />
+  </LinearLayout>
+</ScrollView>

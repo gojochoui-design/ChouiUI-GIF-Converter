@@ -1,1 +1,3 @@
-<resources><string name="app_name">Choui GIF Converter</string></resources>
+<resources>
+    <string name="app_name">ChouiUI GIF Converter</string>
+</resources>

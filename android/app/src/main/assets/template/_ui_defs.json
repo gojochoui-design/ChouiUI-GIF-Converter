@@ -1,0 +1,18 @@
+{
+  "ui_defs": [
+    "ui/chouiui/chouiui_common.json",
+    "ui/chouiui/chouiui_screens.json",
+    "ui/chouiui/override_inventory.json",
+    "ui/chouiui/override_inventory_pocket.json",
+    "ui/chest_screen.json",
+    "ui/furnace_screen.json",
+    "ui/smoker_screen.json",
+    "ui/blast_furnace_screen.json",
+    "ui/brewing_stand_screen.json",
+    "ui/anvil_screen.json",
+    "ui/enchanting_screen.json",
+    "ui/redstone_screen.json",
+    "ui/inventory_screen.json",
+    "ui/inventory_screen_pocket.json"
+  ]
+}
