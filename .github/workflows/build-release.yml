@@ -1,0 +1,93 @@
+name: Build ChouiUI GIF Converter release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create
+        required: true
+        default: v1.0.2
+
+permissions:
+  contents: write
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        shell: bash
+        run: python -m pip install --upgrade pip PySide6 Pillow pyinstaller
+      - name: Build EXE
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --icon assets/choui_icon.ico `
+            --add-data "template;template" `
+            --add-data "assets;assets" `
+            --add-data "qt.conf;." `
+            --name ChouiGIFConverter main.py
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChouiGIFConverter-exe
+          path: dist/ChouiGIFConverter.exe
+
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android SDK platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Build signed debug APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChouiGIFConverter-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  release:
+    needs: [windows-exe, android-apk]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download EXE
+        uses: actions/download-artifact@v4
+        with:
+          name: ChouiGIFConverter-exe
+          path: release
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: ChouiGIFConverter-apk
+          path: release
+      - name: Rename APK
+        run: mv release/app-debug.apk release/ChouiGIFConverter.apk
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ChouiUI GIF Converter ${{ inputs.tag }}
+          generate_release_notes: true
+          files: |
+            release/ChouiGIFConverter.exe
+            release/ChouiGIFConverter.apk
