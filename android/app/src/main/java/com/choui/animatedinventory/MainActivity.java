@@ -35,9 +35,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 public class MainActivity extends Activity {
     static final int MAX_FLIPBOOK_FRAMES = 23;
+    static final int MAX_FLIPBOOK_SEGMENTS = 8;
 
     static final int REQ_PERM = 7;
 
@@ -220,29 +222,37 @@ public class MainActivity extends Activity {
         int gifW = Math.max(1, m.width());
         int gifH = Math.max(1, m.height());
         int total = countGifFrames(raw);
-        int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES, total));
+        int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES * MAX_FLIPBOOK_SEGMENTS, total));
         int dur = m.duration() > 0 ? m.duration() : count * 100;
         int fps = Math.max(2, Math.min(30, Math.round(1000f * count / dur)));
 
-        Bitmap strip = Bitmap.createBitmap(w * count, h, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(strip);
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        int segmentCount = (count + MAX_FLIPBOOK_FRAMES - 1) / MAX_FLIPBOOK_FRAMES;
+        Map<String, Bitmap> sheets = new HashMap<>();
         for (int n = 0; n < count; n++) {
             int t = count == 1 ? 0 : (int) (dur * n / (float) (count - 1));
             m.setTime(t);
-            c.save();
-            c.scale((float) w / gifW, (float) h / gifH);
-            m.draw(c, 0, 0, p);
-            c.restore();
+            int segment = n / MAX_FLIPBOOK_FRAMES;
+            int local = n % MAX_FLIPBOOK_FRAMES;
+            Bitmap sheet = sheets.get("" + segment);
+            if (sheet == null) {
+                sheet = Bitmap.createBitmap(w * Math.min(MAX_FLIPBOOK_FRAMES, count - segment * MAX_FLIPBOOK_FRAMES), h, Bitmap.Config.ARGB_8888);
+                sheets.put("" + segment, sheet);
+            }
+            Bitmap frame = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas frameCanvas = new Canvas(frame);
+            frameCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            frameCanvas.save();
+            frameCanvas.scale((float) w / gifW, (float) h / gifH);
+            m.draw(frameCanvas, 0, 0, p);
+            frameCanvas.restore();
+            new Canvas(sheet).drawBitmap(frame, local * w, 0, p);
             final int dn = n + 1;
             runOnUiThread(() -> {
                 progress.setMax(count);
                 progress.setProgress(dn);
             });
         }
-
-        ByteArrayOutputStream stripOut = new ByteArrayOutputStream();
-        strip.compress(Bitmap.CompressFormat.PNG, 100, stripOut);
 
         m.setTime(0);
         Bitmap packIcon = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888);
@@ -254,12 +264,16 @@ public class MainActivity extends Activity {
 
         Map<String, byte[]> files = new HashMap<>();
         loadAssets(files, "template", "");
-        files.put("textures/ui/inventory_flipbook.png", stripOut.toByteArray());
+        int[] segmentFrames = new int[segmentCount];
+        for (int segment = 0; segment < segmentCount; segment++) {
+            Bitmap sheet = sheets.get("" + segment);
+            segmentFrames[segment] = Math.min(MAX_FLIPBOOK_FRAMES, count - segment * MAX_FLIPBOOK_FRAMES);
+            ByteArrayOutputStream sheetOut = new ByteArrayOutputStream();
+            sheet.compress(Bitmap.CompressFormat.PNG, 100, sheetOut);
+            files.put("textures/ui/inventory_flipbook_" + String.format("%02d", segment) + ".png", sheetOut.toByteArray());
+        }
         files.put("pack_icon.png", iconOut.toByteArray());
-
-        String common = new String(files.get("ui/chouiui/chouiui_common.json"), "UTF-8")
-                .replaceAll("\\\"frame_count\\\"\\s*:\\s*\\d+", "\"frame_count\": " + count)
-                .replaceAll("\\\"fps\\\"\\s*:\\s*\\d+", "\"fps\": " + fps);
+        String common = patchSegmentedCommon(new String(files.get("ui/chouiui/chouiui_common.json"), "UTF-8"), segmentFrames, fps);
         files.put("ui/chouiui/chouiui_common.json", common.getBytes("UTF-8"));
 
         String name = sanitize(gifFile.getName().replaceFirst("(?i)\\.gif$", "")) + ".mcpack";
@@ -281,6 +295,43 @@ public class MainActivity extends Activity {
             fos.write(zipOut.toByteArray());
         }
         return outFile;
+    }
+
+    String patchSegmentedCommon(String raw, int[] segmentFrames, int fps) throws Exception {
+        JSONObject root = new JSONObject(raw);
+        JSONArray oldControls = root.getJSONObject("java_bg_animated").getJSONArray("controls");
+        JSONObject lines = oldControls.getJSONObject(oldControls.length() - 1);
+        JSONArray controls = new JSONArray();
+        for (int i = 0; i < segmentFrames.length; i++) {
+            String name = String.format("%02d", i);
+            String anim = "segment_" + name;
+            int next = (i + 1) % segmentFrames.length;
+            String nextName = String.format("%02d", next);
+            root.put("inventory_flipbook_" + name, new JSONObject()
+                    .put("anim_type", "flip_book").put("initial_uv", new JSONArray().put(0).put(0))
+                    .put("frame_count", segmentFrames[i]).put("frame_step", 352).put("fps", fps));
+            root.put(anim + "_wait", new JSONObject().put("anim_type", "wait")
+                    .put("duration", segmentFrames[i] / (double) Math.max(fps, 1))
+                    .put("next", "@chouiui." + anim + "_hide"));
+            root.put(anim + "_hide", new JSONObject().put("anim_type", "alpha")
+                    .put("from", 1).put("to", 0).put("duration", 0.01)
+                    .put("next", "@chouiui.segment_" + nextName + "_show"));
+            root.put(anim + "_show", new JSONObject().put("anim_type", "alpha")
+                    .put("from", 0).put("to", 1).put("duration", 0.01)
+                    .put("next", "@chouiui." + anim + "_wait"));
+            JSONObject image = new JSONObject().put("type", "image")
+                    .put("texture", "textures/ui/inventory_flipbook_" + name)
+                    .put("size", new JSONArray().put(176).put(166)).put("offset", new JSONArray().put(0).put(0))
+                    .put("anchor_from", "top_left").put("anchor_to", "top_left").put("layer", 0)
+                    .put("alpha", i == 0 ? 1 : 0).put("uv", "@chouiui.inventory_flipbook_" + name)
+                    .put("uv_size", new JSONArray().put(352).put(332))
+                    .put("anims", new JSONArray().put("@chouiui." + anim + (i == 0 ? "_wait" : "_show")))
+                    .put("disable_anim_fast_forward", true);
+            controls.put(new JSONObject().put("sheet_image_" + name, image));
+        }
+        controls.put(lines);
+        root.getJSONObject("java_bg_animated").put("controls", controls);
+        return root.toString(2);
     }
 
 

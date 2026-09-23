@@ -18,6 +18,8 @@ FRAME_W, FRAME_H = 352, 332
 # widely supported 8192px texture limit: 23 * 352 = 8096px.
 MAX_TEXTURE_WIDTH = 8192
 MAX_FRAMES = max(1, MAX_TEXTURE_WIDTH // FRAME_W)
+MAX_SEGMENTS = 8
+MAX_PACK_FRAMES = MAX_FRAMES * MAX_SEGMENTS
 DEFAULT_DELAY = 100
 MIN_FPS, MAX_FPS = 2, 30
 
@@ -41,8 +43,8 @@ def read_frames(path):
             canvas = Image.new("RGBA", im.size, (0, 0, 0, 0))
     return frames, delays
 
-def resample_indices(total, target=MAX_FRAMES):
-    """Keep every frame up to the safe atlas size, otherwise sample uniformly."""
+def resample_indices(total, target=MAX_PACK_FRAMES):
+    """Keep frames up to the safe multi-atlas budget, otherwise sample uniformly."""
     total = max(0, total)
     if total <= target:
         return list(range(total))
@@ -78,11 +80,33 @@ def sanitize_pack_name(stem):
     name = re.sub(r"[^A-Za-z0-9 _-]", "", stem)
     return re.sub(r"\s+", " ", name).strip()[:48] or "Animated Inventory"
 
-def patch_common(pack_dir, frame_count, fps):
+def patch_common(pack_dir, segments, fps):
     path = os.path.join(pack_dir, COMMON_REL)
     with open(path, encoding="utf-8") as f: data = json.load(f)
-    data["inventory_flipbook"]["frame_count"] = frame_count
-    data["inventory_flipbook"]["fps"] = fps
+    for key in list(data):
+        if key.startswith("inventory_flipbook_") or key.startswith("segment_"):
+            del data[key]
+    controls = data["java_bg_animated"]["controls"]
+    lines = next(item for item in controls if "lines_image" in item)
+    controls[:] = []
+    segment_duration = sum(len(frames) for frames, _ in segments) / float(max(fps, 1))
+    for index, (frames, _) in enumerate(segments):
+        name = f"inventory_flipbook_{index:02d}"
+        anim = f"segment_{index:02d}"
+        data[name] = {"anim_type": "flip_book", "initial_uv": [0, 0], "frame_count": len(frames), "frame_step": FRAME_W, "fps": fps}
+        next_index = (index + 1) % len(segments)
+        next_name = f"segment_{next_index:02d}"
+        data[f"{anim}_wait"] = {"anim_type": "wait", "duration": len(frames) / float(max(fps, 1)), "next": f"@chouiui.{anim}_hide"}
+        data[f"{anim}_hide"] = {"anim_type": "alpha", "from": 1, "to": 0, "duration": 0.01, "next": f"@chouiui.{next_name}_show"}
+        data[f"{anim}_show"] = {"anim_type": "alpha", "from": 0, "to": 1, "duration": 0.01, "next": f"@chouiui.{anim}_wait"}
+        controls.append({f"sheet_image_{index:02d}": {
+            "type": "image", "texture": f"textures/ui/{name}", "size": [176, 166], "offset": [0, 0],
+            "anchor_from": "top_left", "anchor_to": "top_left", "layer": 0,
+            "alpha": 1 if index == 0 else 0, "uv": f"@chouiui.{name}", "uv_size": [FRAME_W, FRAME_H],
+            "anims": [f"@chouiui.{anim}_wait"] if index == 0 else [f"@chouiui.{anim}_show"],
+            "disable_anim_fast_forward": True,
+        }})
+    controls.append(lines)
     with open(path, "w", encoding="utf-8") as f: json.dump(data, f, indent=2, ensure_ascii=False)
 
 def patch_manifest(pack_dir, frame_count, fps, gif_stem):
@@ -104,14 +128,16 @@ def convert(gif_path, out_path, progress=None, status=None):
     selected = [frames[i] for i in indices]
     fps = fps_for_duration(delays, len(selected))
     if status: status(f"Rendering {len(selected)} frames @ {fps} fps...")
-    strip = build_strip(selected, progress)
+    grouped = [selected[i:i + MAX_FRAMES] for i in range(0, len(selected), MAX_FRAMES)]
+    strips = [build_strip(group, progress) for group in grouped]
     tmp = tempfile.mkdtemp(prefix="choui_gif_")
     try:
         pack_dir = os.path.join(tmp, "pack")
         shutil.copytree(TEMPLATE_DIR, pack_dir)
-        strip.save(os.path.join(pack_dir, STRIP_REL), optimize=True)
+        for index, strip in enumerate(strips):
+            strip.save(os.path.join(pack_dir, "textures", "ui", f"inventory_flipbook_{index:02d}.png"), optimize=True)
         selected[0].convert("RGBA").resize((256, 256), Image.LANCZOS).save(os.path.join(pack_dir, "pack_icon.png"), optimize=True)
-        patch_common(pack_dir, len(selected), fps)
+        patch_common(pack_dir, [(group, None) for group in grouped], fps)
         patch_manifest(pack_dir, len(selected), fps, os.path.splitext(os.path.basename(gif_path))[0])
         os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
         with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
