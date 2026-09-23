@@ -48,3 +48,15 @@ Select a GIF and press the main button. The preview animates at the same overall
 ## Preview and drag & drop
 
 The Windows preview uses Qt's native `QMovie` decoder, so it displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**.
+
+## Screenshots
+
+The Windows image below is captured from the running desktop application with a demo GIF loaded. The Android image is a rendered reference of the native layout included in `android/`; it is kept in the repository so the two interfaces can be compared without requiring an emulator.
+
+![ChouiUI GIF Converter on Windows](docs/screenshots/windows-app.png)
+
+![ChouiUI GIF Converter Android layout](docs/screenshots/android-app-reference.png)
+
+## Retro archive
+
+The `archive/2019/` directory is a deliberately labeled retro-style archive containing harmless placeholder notes and a legacy launcher mockup. It is included for the old seven-year-old repository aesthetic requested for this project; it does **not** claim that the current application or those files were originally created in 2019. The actual Git history remains unchanged and keeps its real dates.

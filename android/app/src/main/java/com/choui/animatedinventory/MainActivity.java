@@ -158,8 +158,13 @@ public class MainActivity extends Activity {
             Canvas c = new Canvas(frame); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             c.drawColor(Color.rgb(27,27,27));
             if (inventoryBase != null) c.drawBitmap(inventoryBase, null, new Rect(0,0,w,h), p);
-            c.drawBitmap(firstPreview, null, new Rect(0,0,w,h), p);
-            previewMovie.setTime(previewTime); previewMovie.draw(c, 0, 0, p);
+            previewMovie.setTime(previewTime);
+            int movieW = Math.max(1, previewMovie.width());
+            int movieH = Math.max(1, previewMovie.height());
+            c.save();
+            c.scale((float) w / movieW, (float) h / movieH);
+            previewMovie.draw(c, 0, 0, p);
+            c.restore();
             if (inventoryLines != null) c.drawBitmap(inventoryLines, null, new Rect(0,0,w,h), p);
             preview.setImageBitmap(frame);
             previewTime = (previewTime + previewStep) % previewDuration;
