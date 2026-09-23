@@ -13,7 +13,6 @@ TEMPLATE_DIR = os.path.join(ROOT, "template")
 STRIP_REL = os.path.join("textures", "ui", "inventory_flipbook.png")
 LINES_REL = os.path.join("textures", "ui", "inventory_lines.png")
 COMMON_REL = os.path.join("ui", "chouiui", "chouiui_common.json")
-MAX_FRAMES = 11
 FRAME_W, FRAME_H = 352, 332
 DEFAULT_DELAY = 100
 MIN_FPS, MAX_FPS = 2, 30
@@ -38,10 +37,9 @@ def read_frames(path):
             canvas = Image.new("RGBA", im.size, (0, 0, 0, 0))
     return frames, delays
 
-def resample_indices(total, target=MAX_FRAMES):
-    if total <= target: return list(range(total))
-    step = (total - 1) / float(target - 1)
-    return list(dict.fromkeys(int(round(i * step)) for i in range(target)))
+def resample_indices(total, target=None):
+    """Return every source frame; conversion has no arbitrary frame cap."""
+    return list(range(max(0, total)))
 
 def fps_for_duration(delays, frame_count):
     total_ms = sum(d if d > 0 else DEFAULT_DELAY for d in delays)
@@ -132,9 +130,8 @@ def preview_first_frame(gif_path):
 def preview_animation(gif_path):
     """Return every original GIF frame with its native delay.
 
-    The generated Bedrock texture is safely resampled to 11 frames, but the
-    desktop preview must remain smooth. Using every source frame here avoids
-    the visibly slow 11-frame preview for long GIFs.
+    The desktop preview uses every original GIF frame and its native delay,
+    matching the unlimited-frame conversion path.
     """
     frames, delays = read_frames(gif_path)
     selected = [compose_frame(frame, load_lines_overlay()).convert("RGB") for frame in frames]

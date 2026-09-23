@@ -14,7 +14,7 @@ Both desktop and pocket inventory definitions use the same `java_inventory_panel
 - Windows UI built with PySide6 in a frameless window with no maximize control.
 - One main action button and a compact gear dialog for choosing the `.mcpack` export folder.
 - Animated GIF preview using the same selected frames and overall timing as the generated pack.
-- Up to 11 frames per pack to stay within Bedrock texture limits; longer GIFs are evenly resampled while preserving the overall loop duration.
+- All source GIF frames are preserved during conversion; there is no arbitrary fixed frame cap or resampling step.
 - `pack_icon.png` generated from the first frame of the selected GIF.
 - Application icon adapted from the supplied Minecraft inventory image.
 - A new UUID is generated for every conversion.
@@ -47,4 +47,4 @@ Select a GIF and press the main button. The preview animates at the same overall
 
 ## Preview and drag & drop
 
-The Windows preview uses Qt's native `QMovie` decoder, so it displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**.
+The Windows preview displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**. Android uses the system document picker for both GIF selection and output-folder selection; no invasive storage permissions or embedded file browser are required.
