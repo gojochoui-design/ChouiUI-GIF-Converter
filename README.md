@@ -28,7 +28,6 @@ python main.py
 The portable Windows executable is published as `ChouiGIFConverter.exe`.
 
 ## Android
-
 The native Android project is located in `android/` and uses the same visual layout, gear dialog, dark colors and animated preview.
 
 ```bash
@@ -37,6 +36,7 @@ cd android
 ```
 
 The Android package is published as `ChouiGIFConverter.apk` with version name `1.0`.
+The Android app is named **Animated Inventory Minecraft Bedrock by Choui**. It keeps the original GIF filename when creating the `.mcpack`; for example, `AalyaCorriendo.gif` produces `AalyaCorriendo.mcpack`. Folder export uses Android's Storage Access Framework and falls back to a direct save dialog when a file provider cannot create a child document in the selected folder.
 
 ## Usage
 
