@@ -14,7 +14,7 @@ Both desktop and pocket inventory definitions use the same `java_inventory_panel
 - Windows UI built with PySide6 in a frameless window with no maximize control.
 - One main action button and a compact gear dialog for choosing the `.mcpack` export folder.
 - Animated GIF preview using the same selected frames and overall timing as the generated pack.
-- Up to 11 frames per pack to stay within Bedrock texture limits; longer GIFs are evenly resampled while preserving the overall loop duration.
+- The flipbook frame count is generated from the original GIF: every source frame is exported and `frame_count` is patched to that exact number. There is no hardcoded 11- or 23-frame limit in Windows or Android.
 - `pack_icon.png` generated from the first frame of the selected GIF.
 - Application icon adapted from the supplied Minecraft inventory image.
 - A new UUID is generated for every conversion.

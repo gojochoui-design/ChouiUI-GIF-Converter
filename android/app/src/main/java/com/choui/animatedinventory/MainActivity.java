@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Color;
 import android.graphics.Movie;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -158,13 +159,21 @@ public class MainActivity extends Activity {
             Canvas c = new Canvas(frame); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             c.drawColor(Color.rgb(27,27,27));
             if (inventoryBase != null) c.drawBitmap(inventoryBase, null, new Rect(0,0,w,h), p);
+
+            // Render each GIF frame on a fresh transparent layer. Drawing Movie
+            // directly onto the previous composition makes Android retain
+            // transparent/disposed pixels and produces the repeated-frame bug.
+            Bitmap gifLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            Canvas gifCanvas = new Canvas(gifLayer);
+            gifCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             previewMovie.setTime(previewTime);
             int movieW = Math.max(1, previewMovie.width());
             int movieH = Math.max(1, previewMovie.height());
-            c.save();
-            c.scale((float) w / movieW, (float) h / movieH);
-            previewMovie.draw(c, 0, 0, p);
-            c.restore();
+            gifCanvas.save();
+            gifCanvas.scale((float) w / movieW, (float) h / movieH);
+            previewMovie.draw(gifCanvas, 0, 0, p);
+            gifCanvas.restore();
+            c.drawBitmap(gifLayer, 0, 0, p);
             if (inventoryLines != null) c.drawBitmap(inventoryLines, null, new Rect(0,0,w,h), p);
             preview.setImageBitmap(frame);
             previewTime = (previewTime + previewStep) % previewDuration;
