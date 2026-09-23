@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
         int total = countGifFrames(raw);
         int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES * MAX_FLIPBOOK_SEGMENTS, total));
         int dur = m.duration() > 0 ? m.duration() : count * 100;
-        int fps = Math.max(2, Math.min(30, Math.round(1000f * count / dur)));
+        int fps = Math.max(2, Math.min(120, Math.round(1000f * count / dur)));
 
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         int segmentCount = (count + MAX_FLIPBOOK_FRAMES - 1) / MAX_FLIPBOOK_FRAMES;
@@ -247,6 +247,7 @@ public class MainActivity extends Activity {
             m.draw(frameCanvas, 0, 0, p);
             frameCanvas.restore();
             new Canvas(sheet).drawBitmap(frame, local * w, 0, p);
+            frame.recycle();
             final int dn = n + 1;
             runOnUiThread(() -> {
                 progress.setMax(count);

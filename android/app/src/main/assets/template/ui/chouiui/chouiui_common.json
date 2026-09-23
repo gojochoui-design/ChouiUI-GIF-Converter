@@ -422,75 +422,6 @@
       }
     ]
   },
-  "java_crafting_panel": {
-    "type": "panel",
-    "size": [
-      176,
-      166
-    ],
-    "controls": [
-      {
-        "java_bg@chouiui.java_bg": {
-          "$bg_texture": "textures/ui/crafting_table",
-          "$bg_size": [
-            176,
-            166
-          ]
-        }
-      },
-      {
-        "crafting_grid_3x3": {
-          "type": "grid",
-          "size": [
-            54,
-            54
-          ],
-          "anchor_from": "top_left",
-          "anchor_to": "top_left",
-          "offset": [
-            29,
-            16
-          ],
-          "grid_dimensions": [
-            3,
-            3
-          ],
-          "collection_name": "crafting_input_items",
-          "grid_item_template": "chouiui.crafting_input_grid_item"
-        }
-      },
-      {
-        "result_slot": {
-          "type": "grid",
-          "size": [
-            26,
-            26
-          ],
-          "anchor_from": "top_left",
-          "anchor_to": "top_left",
-          "offset": [
-            119,
-            30
-          ],
-          "grid_dimensions": [
-            1,
-            1
-          ],
-          "collection_name": "crafting_output_items",
-          "grid_item_template": "chouiui.crafting_output_grid_item"
-        }
-      },
-      {
-        "inv_grid@chouiui.inv_grid": {}
-      },
-      {
-        "hotbar_grid@chouiui.hotbar_grid": {}
-      },
-      {
-        "x@chouiui.close_button": {}
-      }
-    ]
-  },
   "inventory_flipbook": {
     "anim_type": "flip_book",
     "initial_uv": [
@@ -559,6 +490,52 @@
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "layer": 2
+        }
+      }
+    ]
+  },
+  "creative_inventory_menu": {
+    "$pressed_button_name": "button.inventory_right",
+    "size": [
+      14,
+      14
+    ],
+    "layer": 30,
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "offset": [
+      2,
+      2
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger_hover",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger_pressed",
+          "size": [
+            "100%",
+            "100%"
+          ]
         }
       }
     ]

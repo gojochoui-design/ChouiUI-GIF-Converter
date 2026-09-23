@@ -24,6 +24,17 @@
             }
           ]
         }
+      },
+      {
+        "creative_inventory_menu@chouiui.creative_inventory_menu": {
+          "bindings": [
+            {
+              "binding_type": "global",
+              "binding_name": "#is_creative_mode",
+              "binding_name_override": "#visible"
+            }
+          ]
+        }
       }
     ],
     "button_mappings": [
@@ -44,35 +55,9 @@
       }
     ]
   },
-  "chouiui_pocket_crafting_content": {
-    "type": "input_panel",
-    "controls": [
-      {
-        "java_crafting@chouiui.java_crafting_panel": {}
-      }
-    ],
-    "button_mappings": [
-      {
-        "from_button_id": "button.inventory_left",
-        "to_button_id": "button.hotbar_inventory_left",
-        "mapping_type": "global"
-      },
-      {
-        "from_button_id": "button.inventory_right",
-        "to_button_id": "button.hotbar_inventory_right",
-        "mapping_type": "global"
-      }
-    ]
-  },
   "inventory_screen_pocket@crafting_pocket.inventory_screen_pocket_base": {
     "send_telemetry": false,
     "$screen_content": "crafting_pocket.chouiui_pocket_inventory_content",
-    "$screen_bg_content": "common.screen_background",
-    "$screen_background_alpha": 0.4
-  },
-  "crafting_screen_pocket@crafting_pocket.inventory_screen_pocket_base": {
-    "send_telemetry": false,
-    "$screen_content": "crafting_pocket.chouiui_pocket_crafting_content",
     "$screen_bg_content": "common.screen_background",
     "$screen_background_alpha": 0.4
   }

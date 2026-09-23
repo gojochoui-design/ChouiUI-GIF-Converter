@@ -3,10 +3,7 @@
 Convert any GIF into an animated `.mcpack` resource pack for Minecraft Bedrock using the ChouiUI v2.3 template.
 
 ## Scope of the generated pack
-
-This 1.0 release changes only the player's inventory screen. **Survival and Creative use the same animated Java-style inventory UI**; the Creative block browser and its full block list are intentionally not added. The pack does not override the crafting table, furnace, smoker, blast furnace, brewing stand, anvil, enchanting table, redstone or chest screens. The game's original UI remains active everywhere else.
-
-Both desktop and pocket inventory definitions use the same `java_inventory_panel` in survival and Creative mode.
+This release changes only the player's inventory screen in **Survival and Creative**. Crafting tables, furnaces, smokers, blast furnaces, brewing stands, anvils, enchanting tables, chests and other workstation screens are left to Bedrock's vanilla UI. Creative keeps the vanilla block/item browser, with a Creative-only hamburger control mapped to the next inventory section.
 
 ## Features
 
@@ -49,13 +46,17 @@ Select a GIF and press the main button. The preview animates at the same overall
 
 The Windows preview uses Qt's native `QMovie` decoder, so it displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**.
 
-## Screenshots
+## Real preview
 
-The Windows image below is captured from the running desktop application with a demo GIF loaded. The Android image is a rendered reference of the native layout included in `android/`; it is kept in the repository so the two interfaces can be compared without requiring an emulator.
+The following evidence uses the supplied `AalyaCorriendo.gif`, not a synthetic blue test image. The PNG is captured from the running Windows application. The animated GIF is generated from the same frame compositor used by the Android conversion path, so it shows the real inventory overlay and the original GIF motion without claiming to be an emulator recording.
 
-![ChouiUI GIF Converter on Windows](docs/screenshots/windows-app.png)
+![ChouiUI GIF Converter running on Windows with AalyaCorriendo.gif](docs/screenshots/windows-app-aalya.png)
 
-![ChouiUI GIF Converter Android layout](docs/screenshots/android-app-reference.png)
+![Animated Android preview compositor using AalyaCorriendo.gif](docs/media/android-preview-aalya.gif)
+
+[Download the original demo GIF](docs/media/AalyaCorriendo-original.gif)
+
+The original frame delays are retained when the desktop preview is played. Pack export uses the average timing required by Bedrock's integer `fps` flipbook format and preserves the complete loop duration across all atlas carriages.
 
 ## Retro archive
 
