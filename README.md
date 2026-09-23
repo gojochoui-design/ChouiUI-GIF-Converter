@@ -1,59 +1,41 @@
-# ChouiUI GIF Converter 1.0
+# ChouiUI GIF Converter
 
-Convert any GIF into an animated `.mcpack` resource pack for Minecraft Bedrock using the ChouiUI v2.3 template.
+A small tool that turns a GIF into an animated inventory resource pack for Minecraft Bedrock.
 
-## Scope of the generated pack
-This release changes only the player's inventory screen in **Survival and Creative**. Crafting tables, furnaces, smokers, blast furnaces, brewing stands, anvils, enchanting tables, chests and other workstation screens are left to Bedrock's vanilla UI. Creative keeps the vanilla block/item browser, with a Creative-only hamburger control mapped to the next inventory section.
+## What it changes
 
-## Features
+The pack changes the player's inventory in Survival and Creative. Other screens, such as crafting tables, furnaces, chests and anvils, keep the normal Minecraft interface.
 
-- Matching clean dark interface on Windows and Android.
-- Windows UI built with PySide6 in a frameless window with no maximize control.
-- One main action button and a compact gear dialog for choosing the `.mcpack` export folder.
-- Animated GIF preview using the same selected frames and overall timing as the generated pack.
-- The converter uses a train of up to eight safe flipbook atlases. Each carriage contains at most 23 frames (`23 × 352 = 8096px`, below the common 8192px texture limit), and JSON UI alpha animations hand off from one carriage to the next. GIFs longer than 184 frames are sampled uniformly while preserving the complete loop duration, preventing oversized textures from crashing Bedrock.
-- `pack_icon.png` generated from the first frame of the selected GIF.
-- Application icon adapted from the supplied Minecraft inventory image.
-- A new UUID is generated for every conversion.
+Creative keeps the vanilla block browser and has a small menu button for switching sections.
 
 ## Windows
 
-Install Python 3.8+ and the dependencies:
+Install the dependencies and run the app:
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-The portable Windows executable is published as `ChouiGIFConverter.exe`.
+You can select a GIF, preview it and export an `.mcpack` file. The Windows app also supports dragging a GIF into the window.
 
 ## Android
-The native Android project is located in `android/` and uses the same visual layout, gear dialog, dark colors and animated preview.
+
+The Android project is in the `android/` folder:
 
 ```bash
 cd android
 ./gradlew assembleRelease
 ```
 
-The Android package is published as `ChouiGIFConverter.apk` with version name `1.0`.
-The Android app is named **Animated Inventory Minecraft Bedrock by Choui**. It keeps the original GIF filename when creating the `.mcpack`; for example, `AalyaCorriendo.gif` produces `AalyaCorriendo.mcpack`. Folder export uses Android's Storage Access Framework and falls back to a direct save dialog when a file provider cannot create a child document in the selected folder.
+The APK lets you choose a GIF, preview it and save the generated `.mcpack` to a folder or through Android's save dialog. The output uses the GIF's name, so `example.gif` becomes `example.mcpack`.
 
-## Usage
+## Animation
 
-Select a GIF and press the main button. The preview animates at the same overall speed as the generated pack. Press the gear icon in the top-right corner to choose an output folder. If no custom folder is selected, Windows saves the `.mcpack` next to the GIF and Android opens the system save dialog.
+Long GIFs are split into several safe flipbook textures. The game plays them in sequence, which avoids oversized textures while keeping the animation smooth. The original loop timing is preserved as closely as Bedrock's flipbook format allows.
 
-## Preview and drag & drop
+## Preview
 
-The Windows preview uses Qt's native `QMovie` decoder, so it displays every original GIF frame with the GIF's own timing. Drop a `.gif` file anywhere on the application window to load it immediately; the normal file picker remains available through **SELECT GIF**.
+![Windows app preview](docs/screenshots/windows-app-aalya.png)
 
-## Real preview
-
-The following evidence uses the supplied `AalyaCorriendo.gif`, not a synthetic blue test image. The PNG is captured from the running Windows application. The animated GIF is generated from the same frame compositor used by the Android conversion path, so it shows the real inventory overlay and the original GIF motion without claiming to be an emulator recording.
-
-![ChouiUI GIF Converter running on Windows with AalyaCorriendo.gif](docs/screenshots/windows-app-aalya.png)
-
-![Animated Android preview compositor using AalyaCorriendo.gif](docs/media/android-preview-aalya.gif)
-
-[Download the original demo GIF](docs/media/AalyaCorriendo-original.gif)
-
-The original frame delays are retained when the desktop preview is played. Pack export uses the average timing required by Bedrock's integer `fps` flipbook format and preserves the complete loop duration across all atlas carriages.
+![Android preview](docs/media/android-preview-aalya.gif)
