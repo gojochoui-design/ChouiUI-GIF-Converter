@@ -57,7 +57,3 @@ The following evidence uses the supplied `AalyaCorriendo.gif`, not a synthetic b
 [Download the original demo GIF](docs/media/AalyaCorriendo-original.gif)
 
 The original frame delays are retained when the desktop preview is played. Pack export uses the average timing required by Bedrock's integer `fps` flipbook format and preserves the complete loop duration across all atlas carriages.
-
-## Retro archive
-
-The `archive/2019/` directory is a deliberately labeled retro-style archive containing harmless placeholder notes and a legacy launcher mockup. It is included for the old seven-year-old repository aesthetic requested for this project; it does **not** claim that the current application or those files were originally created in 2019. The actual Git history remains unchanged and keeps its real dates.
