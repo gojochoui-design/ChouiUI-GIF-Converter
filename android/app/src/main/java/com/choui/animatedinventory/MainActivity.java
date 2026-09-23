@@ -37,6 +37,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class MainActivity extends Activity {
+    static final int MAX_FLIPBOOK_FRAMES = 23;
 
     static final int REQ_PERM = 7;
 
@@ -219,7 +220,7 @@ public class MainActivity extends Activity {
         int gifW = Math.max(1, m.width());
         int gifH = Math.max(1, m.height());
         int total = countGifFrames(raw);
-        int count = Math.max(1, total);
+        int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES, total));
         int dur = m.duration() > 0 ? m.duration() : count * 100;
         int fps = Math.max(2, Math.min(30, Math.round(1000f * count / dur)));
 
@@ -227,7 +228,7 @@ public class MainActivity extends Activity {
         Canvas c = new Canvas(strip);
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         for (int n = 0; n < count; n++) {
-            int t = (int) (dur * n / (float) count);
+            int t = count == 1 ? 0 : (int) (dur * n / (float) (count - 1));
             m.setTime(t);
             c.save();
             c.scale((float) w / gifW, (float) h / gifH);
@@ -315,15 +316,21 @@ public class MainActivity extends Activity {
     }
 
     int countGifFrames(byte[] raw) {
-        int i = 0, n = 0;
+        // Skip GIF signature + logical screen descriptor + global colour table.
+        // Starting at byte 0 makes the old parser stop at the header and return 1.
+        if (raw == null || raw.length < 13) return 1;
+        int i = 6, n = 0;
+        int packed = raw[10] & 255;
+        i = 13;
+        if ((packed & 128) != 0) i += 3 * (1 << ((packed & 7) + 1));
         while (i < raw.length) {
             int b = raw[i++] & 255;
             if (b == 0x3b) break;
             if (b == 0x2c) {
                 if (i + 9 > raw.length) break;
-                int packed = raw[i + 8] & 255;
+                int imagePacked = raw[i + 8] & 255;
                 i += 9;
-                if ((packed & 128) != 0) i += 3 * (1 << ((packed & 7) + 1));
+                if ((imagePacked & 128) != 0) i += 3 * (1 << ((imagePacked & 7) + 1));
                 if (i >= raw.length) break;
                 i++;
                 while (i < raw.length) {

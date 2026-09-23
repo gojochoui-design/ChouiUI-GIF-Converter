@@ -14,6 +14,10 @@ STRIP_REL = os.path.join("textures", "ui", "inventory_flipbook.png")
 LINES_REL = os.path.join("textures", "ui", "inventory_lines.png")
 COMMON_REL = os.path.join("ui", "chouiui", "chouiui_common.json")
 FRAME_W, FRAME_H = 352, 332
+# Bedrock's UI flipbook is a horizontal atlas. Keep a margin below the
+# widely supported 8192px texture limit: 23 * 352 = 8096px.
+MAX_TEXTURE_WIDTH = 8192
+MAX_FRAMES = max(1, MAX_TEXTURE_WIDTH // FRAME_W)
 DEFAULT_DELAY = 100
 MIN_FPS, MAX_FPS = 2, 30
 
@@ -37,9 +41,13 @@ def read_frames(path):
             canvas = Image.new("RGBA", im.size, (0, 0, 0, 0))
     return frames, delays
 
-def resample_indices(total, target=None):
-    """Return every original GIF frame; there is no artificial frame cap."""
-    return list(range(max(0, total)))
+def resample_indices(total, target=MAX_FRAMES):
+    """Keep every frame up to the safe atlas size, otherwise sample uniformly."""
+    total = max(0, total)
+    if total <= target:
+        return list(range(total))
+    step = (total - 1) / float(target - 1)
+    return list(dict.fromkeys(int(round(i * step)) for i in range(target)))
 
 def fps_for_duration(delays, frame_count):
     total_ms = sum(d if d > 0 else DEFAULT_DELAY for d in delays)
@@ -130,8 +138,8 @@ def preview_first_frame(gif_path):
 def preview_animation(gif_path):
     """Return every original GIF frame with its native delay.
 
-    The desktop preview uses every original GIF frame and its native delay,
-    matching the unlimited-frame conversion path.
+    The desktop preview uses every original GIF frame and its native delay.
+    Pack export applies the same safe atlas budget when the GIF is longer.
     """
     frames, delays = read_frames(gif_path)
     selected = [compose_frame(frame, load_lines_overlay()).convert("RGB") for frame in frames]

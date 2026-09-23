@@ -17,8 +17,8 @@ for i in range(24):
 frames[0].save(gif, save_all=True, append_images=frames[1:], duration=60, loop=0)
 info = converter.probe(str(gif))
 assert info.original_count == 24
-assert info.frame_count == 24
+assert info.frame_count == 23
 result = converter.convert(str(gif), str(out))
-assert result.frame_count == 24
+assert result.frame_count == 23
 assert out.exists() and out.stat().st_size > 0
-print(f'PASS: {result.original_count} original frames -> {result.frame_count} flipbook frames')
+print(f'PASS: {result.original_count} original frames -> {result.frame_count} safe flipbook frames')
