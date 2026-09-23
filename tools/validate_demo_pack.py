@@ -17,6 +17,9 @@ with zipfile.ZipFile(out) as pack:
     atlas = sorted(n for n in names if n.startswith('textures/ui/inventory_flipbook_') and n.endswith('.png'))
     assert len(atlas) == 7, atlas
     common = json.loads(pack.read('ui/chouiui/chouiui_common.json'))
+    manifest = json.loads(pack.read('manifest.json'))
+    assert manifest['header']['name'] == 'AalyaCorriendo'
+    assert 'inventory_flipbook' not in common
     assert common['inventory_flipbook_00']['frame_count'] == 23
     assert common['inventory_flipbook_06']['frame_count'] == 13
     assert common['segment_06_wait']['next'] == '@chouiui.segment_06_hide'

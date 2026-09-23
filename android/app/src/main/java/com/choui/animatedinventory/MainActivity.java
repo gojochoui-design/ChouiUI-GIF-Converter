@@ -166,8 +166,6 @@ public class MainActivity extends Activity {
             Bitmap frame = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(frame); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             c.drawColor(Color.rgb(27,27,27));
-            if (inventoryBase != null) c.drawBitmap(inventoryBase, null, new Rect(0,0,w,h), p);
-
             // Render each GIF frame on a fresh transparent layer. Drawing Movie
             // directly onto the previous composition makes Android retain
             // transparent/disposed pixels and produces the repeated-frame bug.
@@ -278,6 +276,12 @@ public class MainActivity extends Activity {
             files.put("textures/ui/inventory_flipbook_" + String.format("%02d", segment) + ".png", sheetOut.toByteArray());
         }
         files.put("pack_icon.png", iconOut.toByteArray());
+        JSONObject manifest = new JSONObject(new String(files.get("manifest.json"), "UTF-8"));
+        JSONObject header = manifest.getJSONObject("header");
+        String packTitle = sanitize(gifDisplayName.replaceFirst("(?i)\\.gif$", ""));
+        header.put("name", packTitle);
+        header.put("description", "Animated inventory from " + packTitle);
+        files.put("manifest.json", manifest.toString(2).getBytes("UTF-8"));
         String common = patchSegmentedCommon(new String(files.get("ui/chouiui/chouiui_common.json"), "UTF-8"), segmentFrames, fps);
         files.put("ui/chouiui/chouiui_common.json", common.getBytes("UTF-8"));
 
@@ -304,6 +308,7 @@ public class MainActivity extends Activity {
 
     String patchSegmentedCommon(String raw, int[] segmentFrames, int fps) throws Exception {
         JSONObject root = new JSONObject(raw);
+        root.remove("inventory_flipbook");
         JSONArray oldControls = root.getJSONObject("java_bg_animated").getJSONArray("controls");
         JSONObject lines = oldControls.getJSONObject(oldControls.length() - 1);
         JSONArray controls = new JSONArray();
