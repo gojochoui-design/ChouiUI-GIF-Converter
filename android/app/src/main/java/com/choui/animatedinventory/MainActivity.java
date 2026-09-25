@@ -3,9 +3,7 @@ package com.choui.animatedinventory;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.provider.DocumentsContract;
-import android.provider.OpenableColumns;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -20,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -49,7 +46,6 @@ public class MainActivity extends Activity {
     File gifFile;
     File pendingOutput;
     Uri outputTree;
-    String gifDisplayName = "Animated Inventory";
 
     ImageView preview;
     TextView info, status, folderValue, placeholderText;
@@ -59,7 +55,6 @@ public class MainActivity extends Activity {
     Movie previewMovie;
     Bitmap firstPreview, inventoryBase, inventoryLines;
     int previewTime=0, previewDuration=100, previewStep=100;
-    long previewStartMs;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,12 +111,11 @@ public class MainActivity extends Activity {
                 Uri u = data.getData();
                 try { getContentResolver().takePersistableUriPermission(u, data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch (Exception ignored) {}
                 gifFile = new File(getCacheDir(), "selected.gif");
-                gifDisplayName = displayNameFor(u);
                 try (InputStream in = getContentResolver().openInputStream(u); OutputStream out = new FileOutputStream(gifFile)) {
                     byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
                 }
                 placeholderText.setVisibility(View.GONE);
-                info.setText(gifDisplayName);
+                info.setText(gifFile.getName());
                 status.setText("Loading preview...");
                 convertButton.setEnabled(true);
                 loadPreview();
@@ -130,11 +124,10 @@ public class MainActivity extends Activity {
             outputTree = data.getData();
             try { getContentResolver().takePersistableUriPermission(outputTree, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)); } catch (Exception ignored) {}
             getPreferences(0).edit().putString("outputTree", outputTree.toString()).apply();
-            folderValue.setText(outputTree.getLastPathSegment() != null ? outputTree.getLastPathSegment() : "Folder selected");
+            folderValue.setText("Folder selected");
             Toast.makeText(this, "Folder saved", Toast.LENGTH_SHORT).show();
         } else if (requestCode == 3 && pendingOutput != null) {
-            try (InputStream in = new FileInputStream(pendingOutput); OutputStream out = getContentResolver().openOutputStream(data.getData(), "w")) {
-                if (out == null) throw new IOException("No writable output stream");
+            try (InputStream in = new FileInputStream(pendingOutput); OutputStream out = getContentResolver().openOutputStream(data.getData())) {
                 byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
                 status.setText("MCPACK saved");
             } catch (Exception e) { status.setText("Could not save MCPACK"); }
@@ -148,12 +141,11 @@ public class MainActivity extends Activity {
             previewMovie = Movie.decodeByteArray(raw, 0, raw.length);
             if (firstPreview == null || previewMovie == null) throw new IOException("GIF decode failed");
             previewDuration = Math.max(100, previewMovie.duration());
-            previewStep = 16;
+            previewStep = Math.max(16, previewDuration / Math.max(1, countGifFrames(raw)));
             previewTime = 0;
-            previewStartMs = SystemClock.uptimeMillis();
             int frames = countGifFrames(raw);
             String sizeStr = firstPreview.getWidth() + "x" + firstPreview.getHeight();
-            info.setText(gifDisplayName + "  •  " + frames + " frames  •  " + sizeStr);
+            info.setText(gifFile.getName() + "  •  " + frames + " frames  •  " + sizeStr);
             status.setText("Ready to convert");
             handler.removeCallbacksAndMessages(null);
             handler.post(previewTick);
@@ -169,13 +161,14 @@ public class MainActivity extends Activity {
             Bitmap frame = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(frame); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             c.drawColor(Color.rgb(27,27,27));
+            if (inventoryBase != null) c.drawBitmap(inventoryBase, null, new Rect(0,0,w,h), p);
+
             // Render each GIF frame on a fresh transparent layer. Drawing Movie
             // directly onto the previous composition makes Android retain
             // transparent/disposed pixels and produces the repeated-frame bug.
             Bitmap gifLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas gifCanvas = new Canvas(gifLayer);
             gifCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            previewTime = (int) ((SystemClock.uptimeMillis() - previewStartMs) % previewDuration);
             previewMovie.setTime(previewTime);
             int movieW = Math.max(1, previewMovie.width());
             int movieH = Math.max(1, previewMovie.height());
@@ -186,6 +179,7 @@ public class MainActivity extends Activity {
             c.drawBitmap(gifLayer, 0, 0, p);
             if (inventoryLines != null) c.drawBitmap(inventoryLines, null, new Rect(0,0,w,h), p);
             preview.setImageBitmap(frame);
+            previewTime = (previewTime + previewStep) % previewDuration;
             handler.postDelayed(this, previewStep);
         }
     };
@@ -205,8 +199,9 @@ public class MainActivity extends Activity {
                     selectButton.setEnabled(true);
                     convertButton.setEnabled(true);
                     progress.setVisibility(View.GONE);
-                    try { saveToSelectedFolder(out); }
+                    try { saveToSelectedFolder(out); status.setText("Saved: " + out.getName()); }
                     catch (Exception e) { status.setText("Could not save MCPACK"); }
+                    Toast.makeText(MainActivity.this, "MCPACK ready", Toast.LENGTH_LONG).show();
                 });
             } catch (final Exception e) {
                 runOnUiThread(() -> {
@@ -229,7 +224,7 @@ public class MainActivity extends Activity {
         int total = countGifFrames(raw);
         int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES * MAX_FLIPBOOK_SEGMENTS, total));
         int dur = m.duration() > 0 ? m.duration() : count * 100;
-        int fps = Math.max(2, Math.min(120, Math.round(1000f * count / dur)));
+        int fps = Math.max(2, Math.min(30, Math.round(1000f * count / dur)));
 
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         int segmentCount = (count + MAX_FLIPBOOK_FRAMES - 1) / MAX_FLIPBOOK_FRAMES;
@@ -252,7 +247,6 @@ public class MainActivity extends Activity {
             m.draw(frameCanvas, 0, 0, p);
             frameCanvas.restore();
             new Canvas(sheet).drawBitmap(frame, local * w, 0, p);
-            frame.recycle();
             final int dn = n + 1;
             runOnUiThread(() -> {
                 progress.setMax(count);
@@ -279,16 +273,10 @@ public class MainActivity extends Activity {
             files.put("textures/ui/inventory_flipbook_" + String.format("%02d", segment) + ".png", sheetOut.toByteArray());
         }
         files.put("pack_icon.png", iconOut.toByteArray());
-        JSONObject manifest = new JSONObject(new String(files.get("manifest.json"), "UTF-8"));
-        JSONObject header = manifest.getJSONObject("header");
-        String packTitle = sanitize(gifDisplayName.replaceFirst("(?i)\\.gif$", ""));
-        header.put("name", packTitle);
-        header.put("description", "Animated inventory from " + packTitle);
-        files.put("manifest.json", manifest.toString(2).getBytes("UTF-8"));
         String common = patchSegmentedCommon(new String(files.get("ui/chouiui/chouiui_common.json"), "UTF-8"), segmentFrames, fps);
         files.put("ui/chouiui/chouiui_common.json", common.getBytes("UTF-8"));
 
-        String name = sanitize(gifDisplayName.replaceFirst("(?i)\\.gif$", "")) + ".mcpack";
+        String name = sanitize(gifFile.getName().replaceFirst("(?i)\\.gif$", "")) + ".mcpack";
         File outDir = getExternalFilesDir(null);
         if (outDir == null) outDir = getCacheDir();
         //noinspection ResultOfMethodCallIgnored
@@ -311,7 +299,6 @@ public class MainActivity extends Activity {
 
     String patchSegmentedCommon(String raw, int[] segmentFrames, int fps) throws Exception {
         JSONObject root = new JSONObject(raw);
-        root.remove("inventory_flipbook");
         JSONArray oldControls = root.getJSONObject("java_bg_animated").getJSONArray("controls");
         JSONObject lines = oldControls.getJSONObject(oldControls.length() - 1);
         JSONArray controls = new JSONArray();
@@ -357,38 +344,10 @@ public class MainActivity extends Activity {
             startActivityForResult(i, 3);
             return;
         }
-        Uri doc;
-        try {
-            doc = DocumentsContract.createDocument(getContentResolver(), outputTree, "application/zip", source.getName());
-            if (doc == null) throw new IOException("Folder did not return a document");
-        } catch (Exception e) {
-            // Some file providers do not implement createDocument correctly.
-            // Keep the selected folder as the preference but offer a reliable
-            // document save fallback instead of silently reporting success.
-            pendingOutput = source;
-            Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-            i.setType("application/zip");
-            i.putExtra(Intent.EXTRA_TITLE, source.getName());
-            i.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(i, 3);
-            return;
-        }
-        try (InputStream in = new FileInputStream(source); OutputStream out = getContentResolver().openOutputStream(doc, "w")) {
-            if (out == null) throw new IOException("No writable output stream");
+        Uri doc = DocumentsContract.createDocument(getContentResolver(), outputTree, "application/octet-stream", source.getName());
+        try (InputStream in = new FileInputStream(source); OutputStream out = getContentResolver().openOutputStream(doc)) {
             byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
         }
-        status.setText("Saved: " + source.getName());
-        Toast.makeText(this, "Saved " + source.getName(), Toast.LENGTH_LONG).show();
-    }
-    String displayNameFor(Uri uri) {
-        try (Cursor c = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-            if (c != null && c.moveToFirst()) {
-                String name = c.getString(0);
-                if (name != null && !name.trim().isEmpty()) return name.replaceFirst("(?i)\\.gif$", "");
-            }
-        } catch (Exception ignored) {}
-        String fallback = uri.getLastPathSegment();
-        return sanitize(fallback == null ? "Animated Inventory" : fallback.replaceFirst("(?i)\\.gif$", ""));
     }
 
     static String sanitize(String s) {

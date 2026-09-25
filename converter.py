@@ -21,7 +21,7 @@ MAX_FRAMES = max(1, MAX_TEXTURE_WIDTH // FRAME_W)
 MAX_SEGMENTS = 8
 MAX_PACK_FRAMES = MAX_FRAMES * MAX_SEGMENTS
 DEFAULT_DELAY = 100
-MIN_FPS, MAX_FPS = 2, 120
+MIN_FPS, MAX_FPS = 2, 30
 
 class GifInfo:
     def __init__(self, path, frame_count, fps, width, height, resampled, original_count=None):
@@ -84,7 +84,7 @@ def patch_common(pack_dir, segments, fps):
     path = os.path.join(pack_dir, COMMON_REL)
     with open(path, encoding="utf-8") as f: data = json.load(f)
     for key in list(data):
-        if key == "inventory_flipbook" or key.startswith("inventory_flipbook_") or key.startswith("segment_"):
+        if key.startswith("inventory_flipbook_") or key.startswith("segment_"):
             del data[key]
     controls = data["java_bg_animated"]["controls"]
     lines = next(item for item in controls if "lines_image" in item)

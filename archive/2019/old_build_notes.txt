@@ -1,0 +1,11 @@
+CHOUIUI LEGACY BUILD NOTES / 2019 STYLE
+=======================================
+
+ARCHIVE STATUS: STYLE MOCKUP — NOT AN AUTHENTIC 2019 RECORD
+
+- Keep the inventory panel dark.
+- Keep GIF timing visible during preview.
+- Export resource packs next to the selected input file.
+- Do not use these notes as build instructions.
+
+The maintained implementation lives in the repository root.

@@ -14,5 +14,21 @@
         "$screen_background_alpha": 0.4
       }
     ]
+  },
+  "crafting_screen_pocket": {
+    "variables": [
+      {
+        "requires": "$desktop_screen",
+        "$screen_content": "crafting_pocket.chouiui_pocket_crafting_content",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.4
+      },
+      {
+        "requires": "$pocket_screen",
+        "$screen_content": "crafting_pocket.chouiui_pocket_crafting_content",
+        "$screen_bg_content": "common.screen_background",
+        "$screen_background_alpha": 0.4
+      }
+    ]
   }
 }
