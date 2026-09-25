@@ -35,6 +35,17 @@
             }
           ]
         }
+      },
+      {
+        "creative_inventory_back@chouiui.creative_inventory_back": {
+          "bindings": [
+            {
+              "binding_type": "global",
+              "binding_name": "#is_creative_mode",
+              "binding_name_override": "#visible"
+            }
+          ]
+        }
       }
     ],
     "button_mappings": [

@@ -22,7 +22,7 @@ with zipfile.ZipFile(out) as pack:
     assert 'inventory_flipbook' not in common
     assert common['inventory_flipbook_00']['frame_count'] == 23
     assert common['inventory_flipbook_06']['frame_count'] == 13
-    assert common['segment_06_wait']['next'] == '@chouiui.segment_06_hide'
+    assert common['segment_06_wait']['next'] == 'segment_06_hide'
     assert 'crafting_screen' not in pack.read('ui/inventory_screen.json').decode()
     assert 'crafting_screen_pocket' not in pack.read('ui/inventory_screen_pocket.json').decode()
 print(f'PASS: {info.original_count} GIF frames -> {len(atlas)} atlas carriages, {info.fps} fps average')

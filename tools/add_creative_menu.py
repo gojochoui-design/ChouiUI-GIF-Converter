@@ -17,6 +17,19 @@ common['creative_inventory_menu'] = {
         {'pressed': {'type': 'image', 'texture': 'textures/ui/chouiui_hamburger_pressed', 'size': ['100%', '100%']}},
     ],
 }
+common['creative_inventory_back'] = {
+    '$pressed_button_name': 'button.inventory_left',
+    'size': [14, 14],
+    'layer': 30,
+    'anchor_from': 'top_right',
+    'anchor_to': 'top_right',
+    'offset': [-2, 2],
+    'controls': [
+        {'default': {'type': 'image', 'texture': 'textures/ui/chouiui_hamburger_back', 'size': ['100%', '100%']}},
+        {'hover': {'type': 'image', 'texture': 'textures/ui/chouiui_hamburger_back_hover', 'size': ['100%', '100%']}},
+        {'pressed': {'type': 'image', 'texture': 'textures/ui/chouiui_hamburger_back_pressed', 'size': ['100%', '100%']}},
+    ],
+}
 common_path.write_text(json.dumps(common, indent=2, ensure_ascii=False) + '\n')
 
 for filename, namespace, content_key in [
@@ -29,6 +42,9 @@ for filename, namespace, content_key in [
     controls = content['controls']
     controls[:] = [item for item in controls if 'creative_inventory_menu@chouiui.creative_inventory_menu' not in item]
     controls.append({'creative_inventory_menu@chouiui.creative_inventory_menu': {
+        'bindings': [{'binding_type': 'global', 'binding_name': '#is_creative_mode', 'binding_name_override': '#visible'}]
+    }})
+    controls.append({'creative_inventory_back@chouiui.creative_inventory_back': {
         'bindings': [{'binding_type': 'global', 'binding_name': '#is_creative_mode', 'binding_name_override': '#visible'}]
     }})
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n')

@@ -96,9 +96,9 @@ def patch_common(pack_dir, segments, fps):
         data[name] = {"anim_type": "flip_book", "initial_uv": [0, 0], "frame_count": len(frames), "frame_step": FRAME_W, "fps": fps}
         next_index = (index + 1) % len(segments)
         next_name = f"segment_{next_index:02d}"
-        data[f"{anim}_wait"] = {"anim_type": "wait", "duration": len(frames) / float(max(fps, 1)), "next": f"@chouiui.{anim}_hide"}
-        data[f"{anim}_hide"] = {"anim_type": "alpha", "from": 1, "to": 0, "duration": 0.01, "next": f"@chouiui.{next_name}_show"}
-        data[f"{anim}_show"] = {"anim_type": "alpha", "from": 0, "to": 1, "duration": 0.01, "next": f"@chouiui.{anim}_wait"}
+        data[f"{anim}_wait"] = {"anim_type": "wait", "duration": len(frames) / float(max(fps, 1)), "next": f"{anim}_hide"}
+        data[f"{anim}_hide"] = {"anim_type": "alpha", "from": 1, "to": 0, "duration": 0.01, "next": f"{next_name}_show"}
+        data[f"{anim}_show"] = {"anim_type": "alpha", "from": 0, "to": 1, "duration": 0.01, "next": f"{anim}_wait"}
         controls.append({f"sheet_image_{index:02d}": {
             "type": "image", "texture": f"textures/ui/{name}", "size": [176, 166], "offset": [0, 0],
             "anchor_from": "top_left", "anchor_to": "top_left", "layer": 0,

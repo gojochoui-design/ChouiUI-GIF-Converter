@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -58,6 +59,7 @@ public class MainActivity extends Activity {
     Movie previewMovie;
     Bitmap firstPreview, inventoryBase, inventoryLines;
     int previewTime=0, previewDuration=100, previewStep=100;
+    long previewStartMs;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,8 +148,9 @@ public class MainActivity extends Activity {
             previewMovie = Movie.decodeByteArray(raw, 0, raw.length);
             if (firstPreview == null || previewMovie == null) throw new IOException("GIF decode failed");
             previewDuration = Math.max(100, previewMovie.duration());
-            previewStep = Math.max(16, previewDuration / Math.max(1, countGifFrames(raw)));
+            previewStep = 16;
             previewTime = 0;
+            previewStartMs = SystemClock.uptimeMillis();
             int frames = countGifFrames(raw);
             String sizeStr = firstPreview.getWidth() + "x" + firstPreview.getHeight();
             info.setText(gifDisplayName + "  •  " + frames + " frames  •  " + sizeStr);
@@ -172,6 +175,7 @@ public class MainActivity extends Activity {
             Bitmap gifLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas gifCanvas = new Canvas(gifLayer);
             gifCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            previewTime = (int) ((SystemClock.uptimeMillis() - previewStartMs) % previewDuration);
             previewMovie.setTime(previewTime);
             int movieW = Math.max(1, previewMovie.width());
             int movieH = Math.max(1, previewMovie.height());
@@ -182,7 +186,6 @@ public class MainActivity extends Activity {
             c.drawBitmap(gifLayer, 0, 0, p);
             if (inventoryLines != null) c.drawBitmap(inventoryLines, null, new Rect(0,0,w,h), p);
             preview.setImageBitmap(frame);
-            previewTime = (previewTime + previewStep) % previewDuration;
             handler.postDelayed(this, previewStep);
         }
     };
@@ -322,13 +325,13 @@ public class MainActivity extends Activity {
                     .put("frame_count", segmentFrames[i]).put("frame_step", 352).put("fps", fps));
             root.put(anim + "_wait", new JSONObject().put("anim_type", "wait")
                     .put("duration", segmentFrames[i] / (double) Math.max(fps, 1))
-                    .put("next", "@chouiui." + anim + "_hide"));
+                    .put("next", anim + "_hide"));
             root.put(anim + "_hide", new JSONObject().put("anim_type", "alpha")
                     .put("from", 1).put("to", 0).put("duration", 0.01)
-                    .put("next", "@chouiui.segment_" + nextName + "_show"));
+                    .put("next", "segment_" + nextName + "_show"));
             root.put(anim + "_show", new JSONObject().put("anim_type", "alpha")
                     .put("from", 0).put("to", 1).put("duration", 0.01)
-                    .put("next", "@chouiui." + anim + "_wait"));
+                    .put("next", anim + "_wait"));
             JSONObject image = new JSONObject().put("type", "image")
                     .put("texture", "textures/ui/inventory_flipbook_" + name)
                     .put("size", new JSONArray().put(176).put(166)).put("offset", new JSONArray().put(0).put(0))

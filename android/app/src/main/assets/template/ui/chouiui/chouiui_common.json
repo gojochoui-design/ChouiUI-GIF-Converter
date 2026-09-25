@@ -539,5 +539,51 @@
         }
       }
     ]
+  },
+  "creative_inventory_back": {
+    "$pressed_button_name": "button.inventory_left",
+    "size": [
+      14,
+      14
+    ],
+    "layer": 30,
+    "anchor_from": "top_right",
+    "anchor_to": "top_right",
+    "offset": [
+      -2,
+      2
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger_back",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger_back_hover",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/chouiui_hamburger_back_pressed",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      }
+    ]
   }
 }

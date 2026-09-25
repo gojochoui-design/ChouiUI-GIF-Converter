@@ -30,5 +30,5 @@ with zipfile.ZipFile(out) as pack:
     common = json.loads(pack.read('ui/chouiui/chouiui_common.json'))
     assert common['inventory_flipbook_00']['frame_count'] == 23
     assert common['inventory_flipbook_01']['frame_count'] == 1
-    assert common['segment_00_wait']['next'] == '@chouiui.segment_00_hide'
+    assert common['segment_00_wait']['next'] == 'segment_00_hide'
 print(f'PASS: {result.original_count} original frames -> {result.frame_count} segmented flipbook frames')
