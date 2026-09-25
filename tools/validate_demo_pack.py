@@ -14,14 +14,15 @@ assert info.original_count == 151
 assert info.frame_count == 151
 with zipfile.ZipFile(out) as pack:
     names = set(pack.namelist())
-    assert 'textures/ui/inventory_flipbook.png' in names
-    assert 'textures/ui/inventory_flipbook.json' in names
+    atlas = sorted(n for n in names if n.startswith('textures/ui/inventory_flipbook_') and n.endswith('.png'))
+    assert len(atlas) == 7, atlas
     common = json.loads(pack.read('ui/chouiui/chouiui_common.json'))
     manifest = json.loads(pack.read('manifest.json'))
     assert manifest['header']['name'] == 'AalyaCorriendo'
-    assert common['inventory_flipbook']['anim_type'] == 'aseprite_flip_book'
-    aseprite = json.loads(pack.read('textures/ui/inventory_flipbook.json'))
-    assert len(aseprite['frames']) == 151
+    assert 'inventory_flipbook' not in common
+    assert common['inventory_flipbook_00']['frame_count'] == 23
+    assert common['inventory_flipbook_06']['frame_count'] == 13
+    assert common['segment_06_wait']['next'] == '@chouiui.segment_06_hide'
     assert 'crafting_screen' not in pack.read('ui/inventory_screen.json').decode()
     assert 'crafting_screen_pocket' not in pack.read('ui/inventory_screen_pocket.json').decode()
-print(f'PASS: {info.original_count} GIF frames -> one {aseprite["meta"]["size"]["w"]}x{aseprite["meta"]["size"]["h"]} Aseprite sheet, {info.fps} fps average')
+print(f'PASS: {info.original_count} GIF frames -> {len(atlas)} atlas carriages, {info.fps} fps average')

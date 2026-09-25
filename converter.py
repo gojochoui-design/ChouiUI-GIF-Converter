@@ -17,10 +17,9 @@ FRAME_W, FRAME_H = 352, 332
 # Bedrock's UI flipbook is a horizontal atlas. Keep a margin below the
 # widely supported 8192px texture limit: 23 * 352 = 8096px.
 MAX_TEXTURE_WIDTH = 8192
-MAX_TEXTURE_HEIGHT = 8192
-MAX_GRID_COLUMNS = max(1, MAX_TEXTURE_WIDTH // FRAME_W)
-MAX_GRID_ROWS = 8
-MAX_PACK_FRAMES = MAX_GRID_COLUMNS * MAX_GRID_ROWS
+MAX_FRAMES = max(1, MAX_TEXTURE_WIDTH // FRAME_W)
+MAX_SEGMENTS = 8
+MAX_PACK_FRAMES = MAX_FRAMES * MAX_SEGMENTS
 DEFAULT_DELAY = 100
 MIN_FPS, MAX_FPS = 2, 120
 
@@ -69,35 +68,44 @@ def compose_frame(frame, lines):
     base.alpha_composite(lines)
     return base
 
-def build_grid(frames, delays, progress=None):
-    columns = min(MAX_GRID_COLUMNS, max(1, len(frames)))
-    rows = (len(frames) + columns - 1) // columns
-    sheet = Image.new("RGBA", (FRAME_W * columns, FRAME_H * rows), (0, 0, 0, 0))
-    metadata = []
+def build_strip(frames, progress=None):
+    strip = Image.new("RGBA", (FRAME_W * len(frames), FRAME_H), (0, 0, 0, 0))
     lines = load_lines_overlay()
     for i, frame in enumerate(frames):
-        x, y = (i % columns) * FRAME_W, (i // columns) * FRAME_H
-        sheet.paste(compose_frame(frame, lines), (x, y))
-        metadata.append({"filename": f"frame_{i:04d}", "frame": {"x": x, "y": y, "w": FRAME_W, "h": FRAME_H}, "rotated": False, "trimmed": False, "spriteSourceSize": {"x": 0, "y": 0, "w": FRAME_W, "h": FRAME_H}, "sourceSize": {"w": FRAME_W, "h": FRAME_H}, "duration": int(delays[i] if delays[i] > 0 else DEFAULT_DELAY)})
+        strip.paste(compose_frame(frame, lines), (i * FRAME_W, 0))
         if progress: progress(i + 1, len(frames))
-    aseprite = {"frames": metadata, "meta": {"app": "ChouiUI GIF Converter", "version": "1.0", "format": "RGBA8888", "size": {"w": sheet.width, "h": sheet.height}, "scale": "1"}}
-    return sheet, aseprite
+    return strip
 
 def sanitize_pack_name(stem):
     name = re.sub(r"[^A-Za-z0-9 _-]", "", stem)
     return re.sub(r"\s+", " ", name).strip()[:48] or "Animated Inventory"
 
-def patch_common(pack_dir, frame_count, sheet_size):
+def patch_common(pack_dir, segments, fps):
     path = os.path.join(pack_dir, COMMON_REL)
     with open(path, encoding="utf-8") as f: data = json.load(f)
     for key in list(data):
         if key == "inventory_flipbook" or key.startswith("inventory_flipbook_") or key.startswith("segment_"):
             del data[key]
-    data["inventory_flipbook"] = {"anim_type": "aseprite_flip_book", "initial_uv": [0, 0]}
     controls = data["java_bg_animated"]["controls"]
     lines = next(item for item in controls if "lines_image" in item)
     controls[:] = []
-    controls.append({"sheet_image": {"type": "image", "texture": "textures/ui/inventory_flipbook", "size": [176, 166], "offset": [0, 0], "anchor_from": "top_left", "anchor_to": "top_left", "layer": 0, "uv": "@chouiui.inventory_flipbook", "uv_size": [FRAME_W, FRAME_H], "disable_anim_fast_forward": True}})
+    segment_duration = sum(len(frames) for frames, _ in segments) / float(max(fps, 1))
+    for index, (frames, _) in enumerate(segments):
+        name = f"inventory_flipbook_{index:02d}"
+        anim = f"segment_{index:02d}"
+        data[name] = {"anim_type": "flip_book", "initial_uv": [0, 0], "frame_count": len(frames), "frame_step": FRAME_W, "fps": fps}
+        next_index = (index + 1) % len(segments)
+        next_name = f"segment_{next_index:02d}"
+        data[f"{anim}_wait"] = {"anim_type": "wait", "duration": len(frames) / float(max(fps, 1)), "next": f"@chouiui.{anim}_hide"}
+        data[f"{anim}_hide"] = {"anim_type": "alpha", "from": 1, "to": 0, "duration": 0.01, "next": f"@chouiui.{next_name}_show"}
+        data[f"{anim}_show"] = {"anim_type": "alpha", "from": 0, "to": 1, "duration": 0.01, "next": f"@chouiui.{anim}_wait"}
+        controls.append({f"sheet_image_{index:02d}": {
+            "type": "image", "texture": f"textures/ui/{name}", "size": [176, 166], "offset": [0, 0],
+            "anchor_from": "top_left", "anchor_to": "top_left", "layer": 0,
+            "alpha": 1 if index == 0 else 0, "uv": f"@chouiui.{name}", "uv_size": [FRAME_W, FRAME_H],
+            "anims": [f"@chouiui.{anim}_wait"] if index == 0 else [f"@chouiui.{anim}_show"],
+            "disable_anim_fast_forward": True,
+        }})
     controls.append(lines)
     with open(path, "w", encoding="utf-8") as f: json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -120,17 +128,16 @@ def convert(gif_path, out_path, progress=None, status=None):
     selected = [frames[i] for i in indices]
     fps = fps_for_duration(delays, len(selected))
     if status: status(f"Rendering {len(selected)} frames @ {fps} fps...")
-    selected_delays = [delays[i] for i in indices]
-    sheet, aseprite = build_grid(selected, selected_delays, progress)
+    grouped = [selected[i:i + MAX_FRAMES] for i in range(0, len(selected), MAX_FRAMES)]
+    strips = [build_strip(group, progress) for group in grouped]
     tmp = tempfile.mkdtemp(prefix="choui_gif_")
     try:
         pack_dir = os.path.join(tmp, "pack")
         shutil.copytree(TEMPLATE_DIR, pack_dir)
-        sheet.save(os.path.join(pack_dir, "textures", "ui", "inventory_flipbook.png"), optimize=True)
-        with open(os.path.join(pack_dir, "textures", "ui", "inventory_flipbook.json"), "w", encoding="utf-8") as f:
-            json.dump(aseprite, f, indent=2, ensure_ascii=False)
+        for index, strip in enumerate(strips):
+            strip.save(os.path.join(pack_dir, "textures", "ui", f"inventory_flipbook_{index:02d}.png"), optimize=True)
         selected[0].convert("RGBA").resize((256, 256), Image.LANCZOS).save(os.path.join(pack_dir, "pack_icon.png"), optimize=True)
-        patch_common(pack_dir, len(selected), (sheet.width, sheet.height))
+        patch_common(pack_dir, [(group, None) for group in grouped], fps)
         patch_manifest(pack_dir, len(selected), fps, os.path.splitext(os.path.basename(gif_path))[0])
         os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
         with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
