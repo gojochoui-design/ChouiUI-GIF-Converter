@@ -25,10 +25,10 @@ assert result.frame_count == 24
 assert out.exists() and out.stat().st_size > 0
 with zipfile.ZipFile(out) as pack:
     names = set(pack.namelist())
-    assert 'textures/ui/inventory_flipbook_00.png' in names
-    assert 'textures/ui/inventory_flipbook_01.png' in names
+    assert 'textures/ui/inventory_flipbook.png' in names
+    assert 'textures/ui/inventory_flipbook.json' in names
     common = json.loads(pack.read('ui/chouiui/chouiui_common.json'))
-    assert common['inventory_flipbook_00']['frame_count'] == 23
-    assert common['inventory_flipbook_01']['frame_count'] == 1
-    assert common['segment_00_wait']['next'] == 'segment_00_hide'
+    assert common['inventory_flipbook']['anim_type'] == 'aseprite_flip_book'
+    aseprite = json.loads(pack.read('textures/ui/inventory_flipbook.json'))
+    assert len(aseprite['frames']) == 24
 print(f'PASS: {result.original_count} original frames -> {result.frame_count} segmented flipbook frames')

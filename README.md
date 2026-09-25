@@ -32,7 +32,7 @@ The APK lets you choose a GIF, preview it and save the generated `.mcpack` to a 
 
 ## Animation
 
-Long GIFs are split into several safe flipbook textures. The game plays them in sequence, which avoids oversized textures while keeping the animation smooth. The original loop timing is preserved as closely as Bedrock's flipbook format allows.
+GIFs are exported as one safe sprite sheet with Aseprite frame metadata. The game reads the frame rectangles and durations directly, so there is no stack of independent textures and no transition between overlapping controls.
 
 ## Preview
 
