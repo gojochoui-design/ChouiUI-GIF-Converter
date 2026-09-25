@@ -1,110 +1,58 @@
 from pathlib import Path
+import os
+import shutil
 import sys
-from PIL import Image, ImageDraw
-from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QWidget
+from PIL import Image
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs' / 'screenshots'
+MEDIA = ROOT / 'docs' / 'media'
 OUT.mkdir(parents=True, exist_ok=True)
-DEMO = Path('/tmp/chouiui_readme_demo.gif')
-
-
-def make_demo_gif():
-    frames = []
-    for i in range(8):
-        frame = Image.new('RGBA', (352, 332), (34 + i * 8, 54, 78, 255))
-        draw = ImageDraw.Draw(frame)
-        draw.rectangle((16 + i * 3, 18, 336 - i * 3, 314), outline=(224, 224, 224, 255), width=4)
-        draw.rectangle((46, 78, 306, 252), fill=(16, 24, 34, 130), outline=(170, 190, 205, 255), width=2)
-        draw.text((125, 154), f'FRAME {i + 1}', fill=(245, 245, 245, 255))
-        frames.append(frame)
-    frames[0].save(DEMO, save_all=True, append_images=frames[1:], duration=110, loop=0)
-
-
-def pixmap(path):
-    return QPixmap(str(path))
+MEDIA.mkdir(parents=True, exist_ok=True)
+SOURCE = Path(os.environ.get('CHOUIUI_DEMO_GIF', '/home/ubuntu/upload/AalyaCorriendo.gif'))
 
 
 def capture_windows(app):
     import main
     window = main.App()
     window.show()
-    window.load_gif_path(str(DEMO))
+    window.load_gif_path(str(SOURCE))
 
     def shot():
-        window.grab().save(str(OUT / 'windows-app.png'))
+        window.grab().save(str(OUT / 'windows-app-aalya.png'))
         window.close()
-        capture_android(app)
+        make_android_preview_gif(app)
 
-    QTimer.singleShot(650, shot)
+    QTimer.singleShot(900, shot)
 
 
-def capture_android(app):
-    root = QWidget()
-    root.setFixedSize(420, 860)
-    root.setStyleSheet('background:#111111; color:#e2e2e2;')
-    layout = QVBoxLayout(root)
-    layout.setContentsMargins(34, 28, 34, 28)
-    layout.setSpacing(0)
-
-    title = QLabel('ChouiUI')
-    title.setAlignment(Qt.AlignCenter)
-    title.setStyleSheet('font-size:28px; font-weight:700; color:#e2e2e2;')
-    subtitle = QLabel('GIF Converter')
-    subtitle.setAlignment(Qt.AlignCenter)
-    subtitle.setStyleSheet('font-size:14px; color:#989898;')
-    layout.addWidget(title)
-    layout.addWidget(subtitle)
-    layout.addSpacing(28)
-
-    preview = QLabel()
-    preview.setFixedSize(352, 332)
-    preview.setStyleSheet('background:#1b1b1b;')
-    preview.setAlignment(Qt.AlignCenter)
-    preview.setPixmap(pixmap(DEMO))
-    layout.addWidget(preview, 0, Qt.AlignHCenter)
-    info = QLabel('selected.gif  •  8 frames  •  352x332')
-    info.setAlignment(Qt.AlignCenter)
-    info.setStyleSheet('font-size:13px; color:#989898;')
-    layout.addSpacing(16)
-    layout.addWidget(info)
-    layout.addSpacing(22)
-    select = QPushButton('Select GIF')
-    select.setFixedHeight(54)
-    convert = QPushButton('Convert to .mcpack')
-    convert.setFixedHeight(54)
-    for button in (select, convert):
-        button.setStyleSheet('QPushButton { background:#383838; color:#ffffff; border:0; border-radius:6px; font-size:14px; }')
-    layout.addWidget(select)
-    layout.addSpacing(10)
-    layout.addWidget(convert)
-    layout.addSpacing(18)
-    folder = QLabel('Output folder                                      Change')
-    folder.setStyleSheet('font-size:12px; color:#989898;')
-    layout.addWidget(folder)
-    folder_value = QLabel('Same folder as the GIF')
-    folder_value.setStyleSheet('font-size:11px; color:#5a5a5a;')
-    layout.addWidget(folder_value)
-    status = QLabel('Ready to convert')
-    status.setAlignment(Qt.AlignCenter)
-    status.setStyleSheet('font-size:11px; color:#5a5a5a;')
-    layout.addSpacing(20)
-    layout.addWidget(status)
-    root.show()
-
-    def shot():
-        root.grab().save(str(OUT / 'android-app-reference.png'))
-        root.close()
-        app.quit()
-
-    QTimer.singleShot(200, shot)
+def make_android_preview_gif(app):
+    import converter
+    frames, delays = converter.preview_animation(str(SOURCE))
+    pil_frames = []
+    for frame in frames:
+        image = frame.convert('RGB').resize((176, 166), Image.Resampling.LANCZOS)
+        pil_frames.append(image)
+    pil_frames[0].save(
+        MEDIA / 'android-preview-aalya.gif',
+        save_all=True,
+        append_images=pil_frames[1:],
+        duration=delays,
+        loop=0,
+        optimize=False,
+    )
+    shutil.copy2(SOURCE, MEDIA / 'AalyaCorriendo-original.gif')
+    app.quit()
 
 
 if __name__ == '__main__':
-    make_demo_gif()
+    if not SOURCE.exists():
+        raise SystemExit(f'Missing real demo GIF: {SOURCE}')
     app = QApplication(sys.argv)
     capture_windows(app)
     app.exec()
-    print('\n'.join(str(p) for p in sorted(OUT.glob('*.png'))))
+    print(OUT / 'windows-app-aalya.png')
+    print(MEDIA / 'android-preview-aalya.gif')
+    print(MEDIA / 'AalyaCorriendo-original.gif')

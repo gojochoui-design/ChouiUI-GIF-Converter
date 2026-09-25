@@ -3,7 +3,9 @@ package com.choui.animatedinventory;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.provider.DocumentsContract;
+import android.provider.OpenableColumns;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -46,6 +48,7 @@ public class MainActivity extends Activity {
     File gifFile;
     File pendingOutput;
     Uri outputTree;
+    String gifDisplayName = "Animated Inventory";
 
     ImageView preview;
     TextView info, status, folderValue, placeholderText;
@@ -111,11 +114,12 @@ public class MainActivity extends Activity {
                 Uri u = data.getData();
                 try { getContentResolver().takePersistableUriPermission(u, data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch (Exception ignored) {}
                 gifFile = new File(getCacheDir(), "selected.gif");
+                gifDisplayName = displayNameFor(u);
                 try (InputStream in = getContentResolver().openInputStream(u); OutputStream out = new FileOutputStream(gifFile)) {
                     byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
                 }
                 placeholderText.setVisibility(View.GONE);
-                info.setText(gifFile.getName());
+                info.setText(gifDisplayName);
                 status.setText("Loading preview...");
                 convertButton.setEnabled(true);
                 loadPreview();
@@ -124,10 +128,11 @@ public class MainActivity extends Activity {
             outputTree = data.getData();
             try { getContentResolver().takePersistableUriPermission(outputTree, data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)); } catch (Exception ignored) {}
             getPreferences(0).edit().putString("outputTree", outputTree.toString()).apply();
-            folderValue.setText("Folder selected");
+            folderValue.setText(outputTree.getLastPathSegment() != null ? outputTree.getLastPathSegment() : "Folder selected");
             Toast.makeText(this, "Folder saved", Toast.LENGTH_SHORT).show();
         } else if (requestCode == 3 && pendingOutput != null) {
-            try (InputStream in = new FileInputStream(pendingOutput); OutputStream out = getContentResolver().openOutputStream(data.getData())) {
+            try (InputStream in = new FileInputStream(pendingOutput); OutputStream out = getContentResolver().openOutputStream(data.getData(), "w")) {
+                if (out == null) throw new IOException("No writable output stream");
                 byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
                 status.setText("MCPACK saved");
             } catch (Exception e) { status.setText("Could not save MCPACK"); }
@@ -145,7 +150,7 @@ public class MainActivity extends Activity {
             previewTime = 0;
             int frames = countGifFrames(raw);
             String sizeStr = firstPreview.getWidth() + "x" + firstPreview.getHeight();
-            info.setText(gifFile.getName() + "  •  " + frames + " frames  •  " + sizeStr);
+            info.setText(gifDisplayName + "  •  " + frames + " frames  •  " + sizeStr);
             status.setText("Ready to convert");
             handler.removeCallbacksAndMessages(null);
             handler.post(previewTick);
@@ -199,9 +204,8 @@ public class MainActivity extends Activity {
                     selectButton.setEnabled(true);
                     convertButton.setEnabled(true);
                     progress.setVisibility(View.GONE);
-                    try { saveToSelectedFolder(out); status.setText("Saved: " + out.getName()); }
+                    try { saveToSelectedFolder(out); }
                     catch (Exception e) { status.setText("Could not save MCPACK"); }
-                    Toast.makeText(MainActivity.this, "MCPACK ready", Toast.LENGTH_LONG).show();
                 });
             } catch (final Exception e) {
                 runOnUiThread(() -> {
@@ -224,7 +228,7 @@ public class MainActivity extends Activity {
         int total = countGifFrames(raw);
         int count = Math.max(1, Math.min(MAX_FLIPBOOK_FRAMES * MAX_FLIPBOOK_SEGMENTS, total));
         int dur = m.duration() > 0 ? m.duration() : count * 100;
-        int fps = Math.max(2, Math.min(30, Math.round(1000f * count / dur)));
+        int fps = Math.max(2, Math.min(120, Math.round(1000f * count / dur)));
 
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         int segmentCount = (count + MAX_FLIPBOOK_FRAMES - 1) / MAX_FLIPBOOK_FRAMES;
@@ -247,6 +251,7 @@ public class MainActivity extends Activity {
             m.draw(frameCanvas, 0, 0, p);
             frameCanvas.restore();
             new Canvas(sheet).drawBitmap(frame, local * w, 0, p);
+            frame.recycle();
             final int dn = n + 1;
             runOnUiThread(() -> {
                 progress.setMax(count);
@@ -276,7 +281,7 @@ public class MainActivity extends Activity {
         String common = patchSegmentedCommon(new String(files.get("ui/chouiui/chouiui_common.json"), "UTF-8"), segmentFrames, fps);
         files.put("ui/chouiui/chouiui_common.json", common.getBytes("UTF-8"));
 
-        String name = sanitize(gifFile.getName().replaceFirst("(?i)\\.gif$", "")) + ".mcpack";
+        String name = sanitize(gifDisplayName.replaceFirst("(?i)\\.gif$", "")) + ".mcpack";
         File outDir = getExternalFilesDir(null);
         if (outDir == null) outDir = getCacheDir();
         //noinspection ResultOfMethodCallIgnored
@@ -344,10 +349,38 @@ public class MainActivity extends Activity {
             startActivityForResult(i, 3);
             return;
         }
-        Uri doc = DocumentsContract.createDocument(getContentResolver(), outputTree, "application/octet-stream", source.getName());
-        try (InputStream in = new FileInputStream(source); OutputStream out = getContentResolver().openOutputStream(doc)) {
+        Uri doc;
+        try {
+            doc = DocumentsContract.createDocument(getContentResolver(), outputTree, "application/zip", source.getName());
+            if (doc == null) throw new IOException("Folder did not return a document");
+        } catch (Exception e) {
+            // Some file providers do not implement createDocument correctly.
+            // Keep the selected folder as the preference but offer a reliable
+            // document save fallback instead of silently reporting success.
+            pendingOutput = source;
+            Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            i.setType("application/zip");
+            i.putExtra(Intent.EXTRA_TITLE, source.getName());
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(i, 3);
+            return;
+        }
+        try (InputStream in = new FileInputStream(source); OutputStream out = getContentResolver().openOutputStream(doc, "w")) {
+            if (out == null) throw new IOException("No writable output stream");
             byte[] b = new byte[8192]; int n; while ((n = in.read(b)) > 0) out.write(b, 0, n);
         }
+        status.setText("Saved: " + source.getName());
+        Toast.makeText(this, "Saved " + source.getName(), Toast.LENGTH_LONG).show();
+    }
+    String displayNameFor(Uri uri) {
+        try (Cursor c = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                String name = c.getString(0);
+                if (name != null && !name.trim().isEmpty()) return name.replaceFirst("(?i)\\.gif$", "");
+            }
+        } catch (Exception ignored) {}
+        String fallback = uri.getLastPathSegment();
+        return sanitize(fallback == null ? "Animated Inventory" : fallback.replaceFirst("(?i)\\.gif$", ""));
     }
 
     static String sanitize(String s) {
